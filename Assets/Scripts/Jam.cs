@@ -26,8 +26,6 @@ public class Jam : MonoBehaviour
     {
         ray = new Ray(transform.position, -transform.up);
         Debug.DrawRay(ray.origin, ray.direction * 1000, Color.blue);
-
-
         if (Physics.Raycast(ray, out hit))
         {
             hitObject = hit.transform.gameObject;

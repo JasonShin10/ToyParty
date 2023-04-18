@@ -12,7 +12,7 @@ public class SetTile : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-            Vector3 floorPos = new Vector3 (0,0,0);
+        Vector3 floorPos = new Vector3 (0,0,0);
         scaleY = hexPrefab.transform.localScale.y;
         for(int i = 0; i <7; i++)
         {

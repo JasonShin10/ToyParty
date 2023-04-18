@@ -421,6 +421,7 @@ MonoBehaviour:
   queue: []
   compareJames: []
   jumpJames: []
+  lineJames: []
 --- !u!1 &1369039775
 GameObject:
   m_ObjectHideFlags: 0
