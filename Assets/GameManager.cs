@@ -23,13 +23,11 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
         if (Input.GetMouseButton(0))
-        {
-            
+        {           
             ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-                int layerMask = 1 << LayerMask.NameToLayer("Jam");
+            int layerMask = 1 << LayerMask.NameToLayer("Jam");
             if (Physics.Raycast(ray, out hit, layerMask))
             {
                 if (hit.transform.gameObject.layer == LayerMask.NameToLayer("Jam") && switchJames.Count <2)
@@ -37,21 +35,16 @@ public class GameManager : MonoBehaviour
                     hit.transform.GetComponent<Jam>().touched = true;
                     if (!switchJames.Contains(hit.transform.gameObject))
                     {
-                        switchJames.Add(hit.transform.gameObject);
-                        //jamPos.Add(hit.transform.position);
+                        switchJames.Add(hit.transform.gameObject);              
                     }
                 }
             }
-
         }
         // swapping이 true가 아니고 리스트 개수가 2개일때
         if (switchJames.Count == 2 && !swapping)
         {
             StartCoroutine(JamPosChange());
-            
             swapping = true;
-
-
         }
         if (Input.GetMouseButtonUp(0) && switchJames.Count != 2)
         {
@@ -75,7 +68,6 @@ public class GameManager : MonoBehaviour
             currentTime += Time.deltaTime;
             yield return null;
         }
-
         switchJames[0].transform.position = jamTwo;
         switchJames[1].transform.position = jamOne;
         for (int i = 0; i < switchJames.Count; i++)
@@ -86,8 +78,5 @@ public class GameManager : MonoBehaviour
         switchJames.Clear();
         currentTime = 0;
         swapping = false;
-
     }
-
-
 }
