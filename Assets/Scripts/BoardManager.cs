@@ -13,10 +13,8 @@ public class BoardManager : MonoBehaviour
     // 위, 아래, 오른쪽 위, 왼쪽 아래, 왼쪽 위, 오른쪽 아래
     int[] dx = { 0, 0, 1, -1, -1, 1 };
     int[] dy = { 1, -1, 0, -1, 0, -1 };
-    int a;
-    int b;
-    int d;
-    List<GameObject> deleteGemes = new List<GameObject>();
+    bool[,] visited;
+    public List<GameObject> deleteGemes = new List<GameObject>();
 
     private void Awake()
     {
@@ -44,6 +42,7 @@ public class BoardManager : MonoBehaviour
     public void CheckForMatches(GameObject hitObject)
     {
         List<List<GameObject>> tiles = tileScript.Tiles;
+        visited = new bool[100, 100];
         for (int i = 0; i < tiles.Count; i++)
         {
             for (int j = 0; j < tiles[i].Count; j++)
@@ -61,7 +60,6 @@ public class BoardManager : MonoBehaviour
 
     public void CheckThreeMatchesDFS(int r, int c, int dir)
     {
-        bool[,] visited = new bool[tileScript.Tiles.Count, tileScript.Tiles[0].Count];
         visited[r, c] = true;
         deleteGemes.Add(tileScript.Tiles[r][c]);
         int dd = dir;
@@ -104,70 +102,7 @@ public class BoardManager : MonoBehaviour
                     visited[nextRow, nextColumn] = false;
                 }
             }
-        }
-        //for (int i = 2; i < 4; i++)
-        //{
-        //    int nextRow = r + dx[i];
-        //    int nextColumn = c + dy[i];
-        //    if (IsInsideGrid(nextRow, nextColumn) && !visited[nextRow, nextColumn] && HasSameColor(r, c, nextRow, nextColumn))
-        //    {
-        //        CheckThreeMatchesDFS(nextRow, nextColumn);
-        //        visited[nextRow, nextColumn] = false;
-        //    }
-        //}
-        //for (int i = 4; i < 6; i++)
-        //{
-        //    int nextRow = r + dx[i];
-        //    int nextColumn = c + dy[i];
-        //    if (IsInsideGrid(nextRow, nextColumn) && !visited[nextRow, nextColumn] && HasSameColor(r, c, nextRow, nextColumn))
-        //    {
-        //        CheckThreeMatchesDFS(nextRow, nextColumn);
-        //        visited[nextRow, nextColumn] = false;
-        //    }
-        //}
-    }
-
-
-    public bool CheckThreeMatches(int r, int c)
-    {
-        Queue<Vector3Int> rowColumnQueue = new Queue<Vector3Int>();
-        bool[,] visited = new bool[tileScript.Tiles.Count, tileScript.Tiles[0].Count];
-        Vector3Int rowColumn = new Vector3Int(r, c, a);
-        visited[r, c] = true;
-        rowColumnQueue.Enqueue(rowColumn);
-
-        while (rowColumnQueue.Count > 0)
-        {
-            Vector3Int current = rowColumnQueue.Dequeue();
-            int currentRow = current.x;
-            int currentColumn = current.y;
-            for (int i = 0; i < 6; i++)
-            {
-                int nextRow = currentRow + dx[i];
-                int nextColumn = currentColumn + dy[i];
-
-                if (IsInsideGrid(nextRow, nextColumn) && !visited[nextRow, nextColumn] && HasSameColor(currentRow, currentColumn, nextRow, nextColumn))
-                {
-                    if (i < 2)
-                    {
-                        rowColumn = new Vector3Int(nextRow, nextColumn, a++);
-
-                    }
-                    else if (2 <= i && i < 4)
-                    {
-                        rowColumn = new Vector3Int(nextRow, nextColumn, b++);
-                    }
-                    else if (4 <= i && i < 6)
-                    {
-                        rowColumn = new Vector3Int(nextRow, nextColumn, d++);
-                    }
-                    rowColumnQueue.Enqueue(rowColumn);
-                    visited[nextRow, nextColumn] = true;
-                }
-            }
-        }
-
-        return false;
+        }  
     }
 
     private bool IsInsideGrid(int row, int col)
@@ -177,6 +112,10 @@ public class BoardManager : MonoBehaviour
 
     private bool HasSameColor(int row1, int col1, int row2, int col2)
     {
-        return tileScript.Tiles[row1][col1].GetComponent<TileRay>().color == tileScript.Tiles[row2][col2].GetComponent<TileRay>().color;
+        if (IsInsideGrid(row1, col1) && IsInsideGrid(row2, col2))
+        {
+            return tileScript.Tiles[row1][col1].GetComponent<TileRay>().color.name == tileScript.Tiles[row2][col2].GetComponent<TileRay>().color.name;
+        }
+        return false;
     }
 }
