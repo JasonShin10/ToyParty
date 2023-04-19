@@ -6,12 +6,27 @@ public class Tile : MonoBehaviour
     [SerializeField] private GameObject hexPrefab;
     [SerializeField] private GameObject[] jamPrefabs;
 
-    private const int TileRows = 7;
-    private readonly int[] tileCounts = { 3, 4, 5, 6, 5, 4, 3 };
-    private List<List<GameObject>> tiles = new List<List<GameObject>>();
+    [SerializeField] int[] tileCounts = { 3, 4, 5, 6, 5, 4, 3 };
 
+    private List<List<GameObject>> tiles = new List<List<GameObject>>();
+    private List<List<GameObject>> gemes = new List<List<GameObject>>();
+    public List<List<GameObject>> Tiles
+    {
+        get
+        {
+            return tiles;
+        }
+    }
+    public List<List<GameObject>> Gemes
+    {
+        get
+        {
+            return gemes;
+        }
+    }
     private void Start()
     {
+        BoardManager.instance.RegissterTileScript(this);
         CreateTiles();
         CreateJams();
     }
@@ -19,21 +34,19 @@ public class Tile : MonoBehaviour
     private void CreateTiles()
     {
         float scaleY = hexPrefab.transform.localScale.y;
-
         for (int xOffset = -3; xOffset <= 3; xOffset++)
         {
+            List<GameObject> columns = new List<GameObject>();
             int tileCount = tileCounts[xOffset + 3];
             Vector3 floorPos = new Vector3(xOffset * 0.75f, Mathf.Abs(xOffset) * (Mathf.Sqrt(3) * scaleY * 0.25f), 0);
-
-            List<GameObject> currentRow = new List<GameObject>();
             for (int i = 0; i < tileCount; i++)
             {
                 GameObject tile = Instantiate(hexPrefab);
                 floorPos.y += Mathf.Sqrt(3) * scaleY * 0.5f;
                 tile.transform.position = floorPos;
-                currentRow.Add(tile);
+                columns.Add(tile);
             }
-            tiles.Add(currentRow);
+            tiles.Add(columns);
         }
     }
 
@@ -43,6 +56,7 @@ public class Tile : MonoBehaviour
 
         for (int xOffset = -3; xOffset <= 3; xOffset++)
         {
+            List<GameObject> columns = new List<GameObject>();
             int tileCount = tileCounts[xOffset + 3];
             Vector3 jamPos = new Vector3(xOffset * 0.75f, Mathf.Abs(xOffset) * (Mathf.Sqrt(3) * scaleY * 0.25f), 0);
 
@@ -52,7 +66,9 @@ public class Tile : MonoBehaviour
                 GameObject jam = Instantiate(jamPrefabs[random]);
                 jamPos.y += Mathf.Sqrt(3) * scaleY * 0.5f;
                 jam.transform.position = jamPos + new Vector3(0, 0, -0.25f);
+                columns.Add(jam);
             }
+            gemes.Add(columns);
         }
     }
 }

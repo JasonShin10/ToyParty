@@ -11,7 +11,6 @@ public class SetHexagon : MonoBehaviour
         {
             instance = this;
         }
-
     }
     public GameObject hexPrefab;
     public int numRows = 7;
@@ -54,14 +53,12 @@ public class SetHexagon : MonoBehaviour
                 {
                     rowList.Add(null);
                     continue;
-
                 }
                 float xPos = col * xOffset;
                 float yPos = row * yOffset;
                 if (row % 2 == 1)
                 {
                     xPos += xOffset / 2f;
-
                 }
                 Vector3 hexPos = new Vector3(xPos, 0f, yPos);
                 GameObject hex = Instantiate(hexPrefab, hexPos, Quaternion.identity, transform);
@@ -70,7 +67,6 @@ public class SetHexagon : MonoBehaviour
             }
             tiles.Add(rowList);
         }
-
         for (int i = 0; i < tiles.Count; i++)
         {
             for (int j = 0; j < rowList.Count; j++)
@@ -78,9 +74,7 @@ public class SetHexagon : MonoBehaviour
                 Debug.Log("(" + i + ", " + j + ") : " + tiles[i][j]);
             }
         }
-
         CreateJam();
-
         LocateJam();
     }
     void Update()
@@ -141,10 +135,12 @@ public class SetHexagon : MonoBehaviour
                             lineJames.Add(tiles[i][j + 1].GetComponent<TileRay>().color);
                             lineJames.Add(tiles[i][j + 2].GetComponent<TileRay>().color);
                         }
+
                         if (i - 1 >= 0 && j + 2 < rowList.Count && tiles[i - 1][j +2])
                         {
                             jumpJames.Add(tiles[i - 1][j + 2].GetComponent<TileRay>().color);
                         }
+
                         if (i - 1 >= 0 &&  i - 2 >= 0 && j + 1 < rowList.Count && tiles[i - 1][j+1] && tiles[i - 2][j +1])
                         {
                             compareJames.Add(tiles[i - 1][j + 1].GetComponent<TileRay>().color);
@@ -153,10 +149,12 @@ public class SetHexagon : MonoBehaviour
                             lineJames.Add(tiles[i - 1][j + 1].GetComponent<TileRay>().color);
                             lineJames.Add(tiles[i - 2][j + 1].GetComponent<TileRay>().color);
                         }
+
                         if (i - 2 >= 0 && tiles[i - 2][j])
                         {
                             jumpJames.Add(tiles[i - 2][j].GetComponent<TileRay>().color);
                         }
+
                         if (i-1 >= 0 && i -2 >= 0 && j - 1 >= 0 && tiles[i - 1][j] && tiles[i - 2][j -1])
                         {
                             compareJames.Add(tiles[i - 1][j].GetComponent<TileRay>().color);
@@ -165,6 +163,7 @@ public class SetHexagon : MonoBehaviour
                             lineJames.Add(tiles[i - 1][j].GetComponent<TileRay>().color);
                             lineJames.Add(tiles[i - 2][j - 1].GetComponent<TileRay>().color);
                         }
+
                         if (i-1 >= 0 && j-1 >= 0 && tiles[i - 1][j -1])
                         {
                             jumpJames.Add(tiles[i - 1][j - 1].GetComponent<TileRay>().color);
@@ -209,6 +208,7 @@ public class SetHexagon : MonoBehaviour
                         queue.Add(tiles[i][j].GetComponent<TileRay>().color);
                         jumpJames.Add(tiles[i][j].GetComponent<TileRay>().color);
                         lineJames.Add(tiles[i][j].GetComponent<TileRay>().color);
+
                         if (j + 1 < rowList.Count && j +2 < rowList.Count - 1 && tiles[i][j + 1] && tiles[i][j +2])
                         {
                             compareJames.Add(tiles[i][j + 1].GetComponent<TileRay>().color);
@@ -217,10 +217,12 @@ public class SetHexagon : MonoBehaviour
                             lineJames.Add(tiles[i][j + 1].GetComponent<TileRay>().color);
                             lineJames.Add(tiles[i][j + 2].GetComponent<TileRay>().color);
                         }
+
                         if (i - 1 >= 0 && j+2 < rowList.Count -1 && tiles[i - 1][j + 2] != null)
                         {
                             jumpJames.Add(tiles[i - 1][j + 2].GetComponent<TileRay>().color);
                         }
+
                         if (i - 1 >= 0 && i - 2 >= 0 && j  + 1 < rowList.Count - 1 && tiles[i - 1][j] != null && tiles[i - 2][j +1])
                         {
                             compareJames.Add(tiles[i - 1][j].GetComponent<TileRay>().color);
@@ -230,10 +232,12 @@ public class SetHexagon : MonoBehaviour
                             lineJames.Add(tiles[i - 2][j + 1].GetComponent<TileRay>().color);
 
                         }
+
                         if (i -2 >= 0 && tiles[i - 2][j] != null)
                         {
                             jumpJames.Add(tiles[i - 2][j].GetComponent<TileRay>().color);
                         }
+
                         if (i - 1 >= 0 && i -2 >= 0 && j-1 >= 0 && tiles[i - 1][j-1] != null && tiles[i - 2][j -1])
                         {
                             compareJames.Add(tiles[i - 1][j - 1].GetComponent<TileRay>().color);
@@ -242,10 +246,12 @@ public class SetHexagon : MonoBehaviour
                             lineJames.Add(tiles[i - 1][j - 1].GetComponent<TileRay>().color);
                             lineJames.Add(tiles[i - 2][j - 1].GetComponent<TileRay>().color);
                         }
+
                         if (i - 1 >= 0 && j -1 >= 0 && tiles[i - 1][j-1] != null)
                         {
                             jumpJames.Add(tiles[i - 1][j - 1].GetComponent<TileRay>().color);
                         }
+
                         if (j - 2 >= 0 && j -1 >= 0 && tiles[i][j-2] != null && tiles[i][j-1] != null)
                         {
                             compareJames.Add(tiles[i][j - 1].GetComponent<TileRay>().color);
@@ -253,10 +259,12 @@ public class SetHexagon : MonoBehaviour
                             lineJames.Add(tiles[i][j - 1].GetComponent<TileRay>().color);
                             lineJames.Add(tiles[i][j - 2].GetComponent<TileRay>().color);
                         }
+
                         if (j - 1 >= 0 && i + 1 < tiles.Count && tiles[i + 1][j -1] != null)
                         {
                             jumpJames.Add(tiles[i + 1][j - 1].GetComponent<TileRay>().color);
                         }
+
                         if (i + 1 < tiles.Count && j -1 < rowList.Count -1 && tiles[i+1][j -1] != null && tiles[i + 1][j-1] && tiles[i + 2][j -1])
                         {
                             compareJames.Add(tiles[i + 1][j - 1].GetComponent<TileRay>().color);
@@ -264,10 +272,12 @@ public class SetHexagon : MonoBehaviour
                             lineJames.Add(tiles[i + 1][j - 1].GetComponent<TileRay>().color);
                             lineJames.Add(tiles[i + 2][j - 1].GetComponent<TileRay>().color);
                         }
+
                         if (i + 2 < tiles.Count)
                         {
                             jumpJames.Add(tiles[i + 2][j].GetComponent<TileRay>().color);
                         }
+
                         if (i + 1 < tiles.Count && j - 1 >= 0 && i + 2 < tiles.Count && tiles[i + 1][j] != null && tiles[i + 2][j -1] != null)
                         {   
                             compareJames.Add(tiles[i + 1][j].GetComponent<TileRay>().color);
@@ -275,24 +285,25 @@ public class SetHexagon : MonoBehaviour
                             lineJames.Add(tiles[i + 1][j - 1].GetComponent<TileRay>().color);
                             lineJames.Add(tiles[i + 2][j - 1].GetComponent<TileRay>().color);
                         }
+
                         if (i + 1 < tiles.Count && j +2 < rowList.Count - 1)
                         {
                             jumpJames.Add(tiles[i + 1][j + 2].GetComponent<TileRay>().color);
                         }
-
                     }
-
                     break;
                 }
             }
         }
+
         FourJam();
+
         FourAboveCheck();
+
         if (lineJames.Count != 0)
         {
         LineCheck();
         }
-
         //해당 Hexagon이 가진 jam정보를 주변 헥사곤 애들과 비교한다.
         //해당 핵사곤의 위치를 먼저 찾아야 겠지?
         //리스트 어디간에 있을텐데 이름으로 찾으면 될거같은데
@@ -305,6 +316,7 @@ public class SetHexagon : MonoBehaviour
 
         foreach (GameObject jam in compareJames)
         {
+
             if (!count.ContainsKey(jam.name))
             {
                 count[jam.name] = 1;
@@ -312,9 +324,7 @@ public class SetHexagon : MonoBehaviour
             else
             {
                 count[jam.name]++;
-
             }
-
             if (count[jam.name] >= 3)
             {
                 foreach (GameObject sameJam in compareJames)
@@ -337,11 +347,11 @@ public class SetHexagon : MonoBehaviour
             //    }
             //}
         }
+
         if (roundCheck.Count != 0)
         {
             jamEqualCheck();
         }
-
 
     }
 
@@ -361,6 +371,7 @@ public class SetHexagon : MonoBehaviour
                 Destroy(queue[2]);
                 break;
             }
+
             else
             {
                 a = i + compareJames.Count - queue.Count - 1;
@@ -371,7 +382,6 @@ public class SetHexagon : MonoBehaviour
                 queue.RemoveAt(0);
                 queue.Add(compareJames[a + 1]);
             }
-
         }
     }
     public void FourAboveCheck()
@@ -392,8 +402,6 @@ public class SetHexagon : MonoBehaviour
                 }
             }
         }
-
-
     }
 
     public void LineCheck()

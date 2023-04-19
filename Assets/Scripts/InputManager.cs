@@ -11,6 +11,7 @@ public class InputManager : MonoBehaviour
 
     void Start()
     {
+
     }
 
     private float currentTime = 0;

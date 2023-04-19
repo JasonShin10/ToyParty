@@ -24,12 +24,12 @@ public class Jam : MonoBehaviour
 
     public void FindMyHexagon()
     {
-        ray = new Ray(transform.position, -transform.up);
+        ray = new Ray(transform.position, transform.up);
         Debug.DrawRay(ray.origin, ray.direction * 1000, Color.blue);
         if (Physics.Raycast(ray, out hit))
         {
             hitObject = hit.transform.gameObject;
-            SetHexagon.instance.SameJam(hitObject);
+            BoardManager.instance.CheckForMatches(hitObject);
         }
     }
 }
