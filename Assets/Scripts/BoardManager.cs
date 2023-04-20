@@ -11,8 +11,10 @@ public class BoardManager : MonoBehaviour
     int row;
     int col;
     // 위, 아래, 오른쪽 위, 왼쪽 아래, 왼쪽 위, 오른쪽 아래
+    // x > 3
     int[] dx = { 0, 0, 1, -1, -1, 1 };
-    int[] dy = { 1, -1, 0, -1, 0, -1 };
+    int[] dy = { 1, -1, 1, -1, 0, 0 };
+    // x < 3 
     bool[,] visited;
     public List<GameObject> deleteGemes = new List<GameObject>();
 
@@ -52,7 +54,7 @@ public class BoardManager : MonoBehaviour
                 {
                     row = i;
                     col = j;
-                    CheckThreeMatchesDFS(i, j,0);
+                    CheckThreeMatchesDFS(i, j,-1);
                 }
             }
         }
@@ -60,11 +62,11 @@ public class BoardManager : MonoBehaviour
 
     public void CheckThreeMatchesDFS(int r, int c, int dir)
     {
-        visited[r, c] = true;
+        
         deleteGemes.Add(tileScript.Tiles[r][c]);
         int dd = dir;
         // 3이면 2로 만들어야되는데
-        if (dd < 2)
+        if (0 <= dd && dd < 2)
         {
             dd = 0;
         }
@@ -77,7 +79,24 @@ public class BoardManager : MonoBehaviour
             dd = 4;
         }
 
-        for (int i = dd; i < 6 - dd; i++)
+        int a =0 ;
+        if (dd == 0)
+        {
+            a = 4;
+        }
+        else if ( dd == 2)
+        {
+            a = 2;
+        }
+        else if (dd == 4)
+        {
+            a = 0;
+        }
+        if (dd == -1)
+        {
+            dd = 0;
+        }
+        for (int i = dd; i < 6 - a; i++)
         {
             int nextRow = r + dx[i];
             int nextColumn = c + dy[i];
@@ -85,21 +104,20 @@ public class BoardManager : MonoBehaviour
             {
                 if (i < 2)
                 {
-                    deleteGemes.Add(tileScript.Tiles[nextRow][nextColumn]);
+                    visited[nextRow, nextColumn] = true;
                     CheckThreeMatchesDFS(nextRow, nextColumn, i);
-                    visited[nextRow, nextColumn] = false;
+                    
                 }
                 else if (2 <= i && i < 4)
                 {
-                    deleteGemes.Add(tileScript.Tiles[nextRow][nextColumn]);
+                    visited[nextRow, nextColumn] = true;
                     CheckThreeMatchesDFS(nextRow, nextColumn, i);
-                    visited[nextRow, nextColumn] = false;
+                    
                 }
                 else if (4 <= i && i < 6)
                 {
-                    deleteGemes.Add(tileScript.Tiles[nextRow][nextColumn]);
+                    visited[nextRow, nextColumn] = true;
                     CheckThreeMatchesDFS(nextRow, nextColumn, i);
-                    visited[nextRow, nextColumn] = false;
                 }
             }
         }  
