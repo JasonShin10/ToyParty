@@ -32,7 +32,7 @@ public class InputManager : MonoBehaviour
         {
             CheckRaycastHit();
         }
-        
+
         // 보석이 두개가 되었을때 바꾼다.
         if (switchJames.Count == 2 && !swapping)
         {

@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using TMPro.EditorUtilities;
 using UnityEngine;
 
 public class BoardManager : MonoBehaviour
@@ -8,16 +10,16 @@ public class BoardManager : MonoBehaviour
     // Start is called before the first frame update
 
     private Tile tileScript;
-    int row;
-    int col;
     // 위, 아래, 오른쪽 위, 왼쪽 아래, 왼쪽 위, 오른쪽 아래
     // x > 3
     int[] dx = { 0, 0, 1, -1, -1, 1 };
-    int[] dy = { 1, -1, 1, -1, 0, 0 };
+    int[] dy = { -1, 1, -1, 1, 0, 0 };
     // x < 3 
     bool[,] visited;
     public List<GameObject> deleteGemes = new List<GameObject>();
 
+    // 움직인 보석
+    GameObject originGem;
     private void Awake()
     {
         if (!instance)
@@ -36,103 +38,164 @@ public class BoardManager : MonoBehaviour
 
     }
 
-    public void RegissterTileScript(Tile tile)
+    public void RegisterTileScript(Tile tile)
     {
         tileScript = tile;
     }
 
     public void CheckForMatches(GameObject hitObject)
     {
-        List<List<GameObject>> tiles = tileScript.Tiles;
+        Dictionary<Vector2Int, GameObject> tiles = tileScript.Tiles;
         visited = new bool[100, 100];
-        for (int i = 0; i < tiles.Count; i++)
+        if (tiles.ContainsValue(hitObject))
         {
-            for (int j = 0; j < tiles[i].Count; j++)
-            {
-                GameObject tile = tiles[i][j];
-                if (tile == hitObject)
-                {
-                    row = i;
-                    col = j;
-                    CheckThreeMatchesDFS(i, j,-1);
-                }
-            }
-        }
+            Vector2Int tilePos = tiles.FirstOrDefault(x => x.Value == hitObject).Key;
+            GameObject tileObject = hitObject;
+            originGem = tileObject.GetComponent<TileRay>().color;
+            deleteGemes.Add(originGem);
+            CheckThreeMatchesDFS(tilePos,-1);
+        }      
     }
 
-    public void CheckThreeMatchesDFS(int r, int c, int dir)
+    public void CheckThreeMatchesDFS(Vector2Int tilePos, int dir)
     {
+        int q = tilePos.x;
+        int r = tilePos.y;
         
-        deleteGemes.Add(tileScript.Tiles[r][c]);
-        int dd = dir;
-        // 3이면 2로 만들어야되는데
-        if (0 <= dd && dd < 2)
+        if (0 <= dir && dir <= 1)
         {
-            dd = 0;
+            dir = 0;
         }
-        else if (2 <= dd && dd < 4)
+        else if (2 <= dir && dir < 4)
         {
-            dd = 2;
+            dir = 2;
         }
-        else if (4 <= dd && dd < 6)
+        else if ( 4 <= dir && dir < 6)
         {
-            dd = 4;
+            dir = 4;
         }
 
-        int a =0 ;
-        if (dd == 0)
+        int a = 0;
+        if (dir == 0)
         {
             a = 4;
         }
-        else if ( dd == 2)
+        else if (dir == 2)
         {
             a = 2;
         }
-        else if (dd == 4)
+        else if (dir == 4)
         {
             a = 0;
         }
-        if (dd == -1)
+        if (dir == -1)
         {
-            dd = 0;
+            dir = 0;
         }
-        for (int i = dd; i < 6 - a; i++)
+        for (int i = dir; i<6-a; i++)
         {
-            int nextRow = r + dx[i];
-            int nextColumn = c + dy[i];
-            if (IsInsideGrid(nextRow, nextColumn) && !visited[nextRow, nextColumn] && HasSameColor(r, c, nextRow, nextColumn))
+            int nextQ = q + dx[i];
+            int nextR = r + dy[i];
+            if (IsInsideGrid(nextQ, nextR) && HasSameColor(q,r,nextQ,nextR) && !visited[nextQ + 10,nextR + 10])
             {
-                if (i < 2)
+                visited[nextQ+10,nextR+10] = true;
+                Vector2Int nextTilePos = new Vector2Int(nextQ,nextR);
+                deleteGemes.Add(tileScript.Tiles[nextTilePos].GetComponent<TileRay>().color);
+                CheckThreeMatchesDFS(nextTilePos, i);
+                if (deleteGemes.Count < 2)
                 {
-                    visited[nextRow, nextColumn] = true;
-                    CheckThreeMatchesDFS(nextRow, nextColumn, i);
-                    
-                }
-                else if (2 <= i && i < 4)
-                {
-                    visited[nextRow, nextColumn] = true;
-                    CheckThreeMatchesDFS(nextRow, nextColumn, i);
-                    
-                }
-                else if (4 <= i && i < 6)
-                {
-                    visited[nextRow, nextColumn] = true;
-                    CheckThreeMatchesDFS(nextRow, nextColumn, i);
+                    deleteGemes.Clear();
+                    deleteGemes.Add(originGem);
                 }
             }
-        }  
+        }
+
+
+        //deleteGemes.Add(tileScript.Tiles[r][c]);
+        //int dd = dir;
+        //// 3이면 2로 만들어야되는데
+        //if (0 <= dd && dd < 2)
+        //{
+        //    dd = 0;
+        //}
+        //else if (2 <= dd && dd < 4)
+        //{
+        //    dd = 2;
+        //}
+        //else if (4 <= dd && dd < 6)
+        //{
+        //    dd = 4;
+        //}
+
+        //int a = 0;
+        //if (dd == 0)
+        //{
+        //    a = 4;
+        //}
+        //else if (dd == 2)
+        //{
+        //    a = 2;
+        //}
+        //else if (dd == 4)
+        //{
+        //    a = 0;
+        //}
+        //if (dd == -1)
+        //{
+        //    dd = 0;
+        //}
+        //for (int i = dd; i < 6 - a; i++)
+        //{
+        //    int nextRow = r + dx[i];
+        //    int nextColumn = c + dy[i];
+        //    if (IsInsideGrid(nextRow, nextColumn) && !visited[nextRow, nextColumn] && HasSameColor(r, c, nextRow, nextColumn))
+        //    {
+        //        if (i < 2)
+        //        {
+        //            visited[nextRow, nextColumn] = true;
+        //            CheckThreeMatchesDFS(nextRow, nextColumn, i);
+
+        //        }
+        //        else if (2 <= i && i < 4)
+        //        {
+        //            visited[nextRow, nextColumn] = true;
+        //            CheckThreeMatchesDFS(nextRow, nextColumn, i);
+
+        //        }
+        //        else if (4 <= i && i < 6)
+        //        {
+        //            visited[nextRow, nextColumn] = true;
+        //            CheckThreeMatchesDFS(nextRow, nextColumn, i);
+        //        }
+        //    }
+        //}
     }
 
-    private bool IsInsideGrid(int row, int col)
+    private bool IsInsideGrid(int nextQ, int nextR)
     {
-        return row >= 0 && row < tileScript.Tiles.Count && col >= 0 && col < tileScript.Tiles[row].Count;
+        Vector2Int nextTile = new Vector2Int(nextQ,nextR);
+        if (tileScript.Tiles.ContainsKey(nextTile))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+        //return nextQ >= 0 && nextR < tileScript.Tiles.Count && nextQ >= 0 && nextQ < tileScript.Tiles[nextR].Count;
     }
 
     private bool HasSameColor(int row1, int col1, int row2, int col2)
     {
-        if (IsInsideGrid(row1, col1) && IsInsideGrid(row2, col2))
+        if (IsInsideGrid(row2, col2))
         {
-            return tileScript.Tiles[row1][col1].GetComponent<TileRay>().color.name == tileScript.Tiles[row2][col2].GetComponent<TileRay>().color.name;
+            Vector2Int currentTile = new Vector2Int(row1, col1);
+            Vector2Int nextTile = new Vector2Int(row2, col2);
+            if (tileScript.Tiles[currentTile].GetComponent<TileRay>().color.name == tileScript.Tiles[nextTile].GetComponent<TileRay>().color.name)
+            {
+                return true;
+            }
+            //return tileScript.Tiles[row1][col1].GetComponent<TileRay>().color.name == tileScript.Tiles[row2][col2].GetComponent<TileRay>().color.name;
         }
         return false;
     }

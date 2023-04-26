@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    
+
     public bool swapping = false;
     public bool isCorotineRunning;
     public List<GameObject> switchJames = new List<GameObject>();
@@ -24,18 +24,18 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         if (Input.GetMouseButton(0))
-        {           
+        {
             ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
             int layerMask = 1 << LayerMask.NameToLayer("Jam");
             if (Physics.Raycast(ray, out hit, layerMask))
             {
-                if (hit.transform.gameObject.layer == LayerMask.NameToLayer("Jam") && switchJames.Count <2)
+                if (hit.transform.gameObject.layer == LayerMask.NameToLayer("Jam") && switchJames.Count < 2)
                 {
                     hit.transform.GetComponent<Jam>().touched = true;
                     if (!switchJames.Contains(hit.transform.gameObject))
                     {
-                        switchJames.Add(hit.transform.gameObject);              
+                        switchJames.Add(hit.transform.gameObject);
                     }
                 }
             }
@@ -50,10 +50,10 @@ public class GameManager : MonoBehaviour
         {
             for (int i = 0; i < switchJames.Count; i++)
             {
-                switchJames[i].GetComponent<Jam>().touched = false;           
+                switchJames[i].GetComponent<Jam>().touched = false;
             }
             switchJames.Clear();
-            swapping= false;
+            swapping = false;
         }
     }
 

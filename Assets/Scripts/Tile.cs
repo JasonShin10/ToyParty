@@ -6,69 +6,75 @@ public class Tile : MonoBehaviour
     [SerializeField] private GameObject hexPrefab;
     [SerializeField] private GameObject[] jamPrefabs;
 
-    [SerializeField] int[] tileCounts = { 3, 4, 5, 6, 5, 4, 3 };
+    private Dictionary<Vector2Int, GameObject> tiles = new Dictionary<Vector2Int, GameObject>();
+    private Dictionary<Vector2Int, GameObject> gemes = new Dictionary<Vector2Int, GameObject>();
 
-    private List<List<GameObject>> tiles = new List<List<GameObject>>();
-    private List<List<GameObject>> gemes = new List<List<GameObject>>();
-    public List<List<GameObject>> Tiles
-    {
-        get
-        {
-            return tiles;
-        }
-    }
-    public List<List<GameObject>> Gemes
-    {
-        get
-        {
-            return gemes;
-        }
-    }
     private void Start()
     {
-        BoardManager.instance.RegissterTileScript(this);
+        BoardManager.instance.RegisterTileScript(this);
         CreateTiles();
         CreateJams();
     }
 
+    public Dictionary<Vector2Int, GameObject> Tiles { get { return tiles; } }
+    public Dictionary<Vector2Int, GameObject> Gemes { get { return gemes; } }
+
     private void CreateTiles()
     {
-        float scaleY = hexPrefab.transform.localScale.y;
-        for (int xOffset = -3; xOffset <= 3; xOffset++)
+        // 6각형의 너비,폭(width)
+        float width = hexPrefab.transform.localScale.y;
+        // q는 좌우방향
+        for (int q = -3; q <= 3; q++)
         {
-            List<GameObject> columns = new List<GameObject>();
-            int tileCount = tileCounts[xOffset + 3];
-            Vector3 floorPos = new Vector3(xOffset * 0.75f, Mathf.Abs(xOffset) * (Mathf.Sqrt(3) * scaleY * 0.25f), 0);
-            for (int i = 0; i < tileCount; i++)
+            // 수직 으로 쌓이는양
+            // q = -3일때 r1 = 0
+            // r2 = 3
+            // 3개 쌓임
+            // q = -2 일때 r1 = -1
+            // r2 = 3
+            // 4개 쌓임
+            int r1 = Mathf.Max(-3, -q - 3);
+            int r2 = Mathf.Min(3, -q + 3);
+
+            for (int r = r1; r < r2; r++)
             {
+                // 축 자표를 생성한다.
+                Vector2Int axialCoord = new Vector2Int(q, r);
+                // 축 좌표를 월드 좌표로 변환한다.
+                Vector3 worldPos = AxialToWorld(axialCoord, width);
                 GameObject tile = Instantiate(hexPrefab);
-                floorPos.y += Mathf.Sqrt(3) * scaleY * 0.5f;
-                tile.transform.position = floorPos;
-                columns.Add(tile);
+                tile.transform.position = worldPos;
+                tile.name = string.Format("Tile {0} , {1}", q, r);
+                tiles[axialCoord] = tile;
             }
-            tiles.Add(columns);
         }
     }
-
     private void CreateJams()
     {
         float scaleY = hexPrefab.transform.localScale.y;
 
-        for (int xOffset = -3; xOffset <= 3; xOffset++)
+        for (int q = -3; q <= 3; q++)
         {
-            List<GameObject> columns = new List<GameObject>();
-            int tileCount = tileCounts[xOffset + 3];
-            Vector3 jamPos = new Vector3(xOffset * 0.75f, Mathf.Abs(xOffset) * (Mathf.Sqrt(3) * scaleY * 0.25f), 0);
+            int r1 = Mathf.Max(-3, -q - 3);
+            int r2 = Mathf.Min(3, -q + 3);
 
-            for (int i = 0; i < tileCount; i++)
+            for (int r = r1; r < r2; r++)
             {
+                Vector2Int axialCoord = new Vector2Int(q, r);
+                Vector3 worldPos = AxialToWorld(axialCoord, scaleY);
                 int random = Random.Range(0, jamPrefabs.Length);
                 GameObject jam = Instantiate(jamPrefabs[random]);
-                jamPos.y += Mathf.Sqrt(3) * scaleY * 0.5f;
-                jam.transform.position = jamPos + new Vector3(0, 0, -0.25f);
-                columns.Add(jam);
+                jam.transform.position = worldPos + new Vector3(0, 0, -0.25f);
+                gemes[axialCoord] = jam;
             }
-            gemes.Add(columns);
         }
     }
+    private Vector3 AxialToWorld(Vector2Int axialCoord, float width)
+    {
+        float x = axialCoord.x * width * 0.75f;
+        float y = (axialCoord.y + (axialCoord.x / 2.0f)) * Mathf.Sqrt(3) * width * 0.5f;
+        // 2D 좌표계와 유니티 좌표계의 차이 때문에 y를 뒤집어준다.
+        return new Vector3(x, -y, 0);
+    }
+
 }
