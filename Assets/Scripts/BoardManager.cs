@@ -14,21 +14,11 @@ public class BoardManager : MonoBehaviour
     int[] dx = { 1, 1, 0, -1, -1, 0 };
     int[] dy = { -1, 0, 1, 1, 0, -1 };
     bool[,] visited;
-    bool[,] BFSVistied;
+    bool[,] BFSVisited;
+    bool[,] DFSVisited;
     public List<GameObject> deleteGemes = new List<GameObject>();
-    public List<GameObject> deleteGEmesBFS = new List<GameObject>();
-
-    public class CustomQueueItem
-    {
-        public Vector2Int Vec { get; set; }
-        public int Value { get; set;}
-
-        public CustomQueueItem(Vector2Int vec, int value)
-        {
-            Vec = vec;
-            Value = value;
-        }
-    }
+    public List<GameObject> deleteGemesBFS = new List<GameObject>();
+    public List<GameObject> deleteGemesDFS = new List<GameObject>();
 
     // 움직인 보석
     GameObject originGem;
@@ -59,9 +49,9 @@ public class BoardManager : MonoBehaviour
     {
         Dictionary<Vector2Int, GameObject> tiles = tileScript.Tiles;
         visited = new bool[100, 100];
-        BFSVistied = new bool[100, 100];
+        BFSVisited = new bool[100, 100];
+        DFSVisited = new bool[100, 100];
 
-       
         if (tiles.ContainsValue(hitObject))
         {
             // vlaue(보석)으로 key(좌표)찾기
@@ -72,66 +62,104 @@ public class BoardManager : MonoBehaviour
             originGem = tileObject.GetComponent<TileRay>().color;
             // 기준 보석을 삭제할 보석 리스트에 넣어준다.
             deleteGemes.Add(originGem);
-
+            deleteGemesBFS.Add(originGem);
             // 6가지 방향으로 보석 검사
-            for (int dir = 0; dir < 6; dir++)
-            {
-                // dfs 같은 보석이 일직선에 3개 같은지 검사
-                CheckThreeMatchesDFS(tilePos, dir);
-                // 반대 direction 방향 
-                int oppositeDir = (dir + 3) % 6;
-                // 반대 DFS
-                CheckThreeMatchesDFS(tilePos, oppositeDir);
-                // 한방향으로 보석이 3개 이하면 성립이 안되므로 다음 방향 검사때를 위해 초기화
-                if (deleteGemes.Count < 3)
-                {
-                    deleteGemes.Clear();
-                    deleteGemes.Add(originGem);
-                }
-            }
+            //for (int dir = 0; dir < 6; dir++)
+            //{
+            //    // dfs 같은 보석이 일직선에 3개 같은지 검사
+            //    CheckThreeMatchesDFS(tilePos, dir);
+            //    // 반대 direction 방향 
+            //    int oppositeDir = (dir + 3) % 6;
+            //    // 반대 DFS
+            //    CheckThreeMatchesDFS(tilePos, oppositeDir);
+            //    // 한방향으로 보석이 3개 이하면 성립이 안되므로 다음 방향 검사때를 위해 초기화
+            //    if (deleteGemes.Count < 3)
+            //    {
+            //        deleteGemes.Clear();
+            //        deleteGemes.Add(originGem);
+            //    }
+            //}
             // 6가지 방향 검사가 끝나고 3개 이상 있으면
             // 없애준다.
-            if (deleteGemes.Count >= 3)
-            {
-                foreach (GameObject gameObject in deleteGemes)
-                {
-                    Destroy(gameObject);
-                }
-            }
-            // 리스트 정리
-            deleteGemes.Clear();
+            //CheckFourMatchesBFS(tilePos);
+            CheckFourMatchesDFS(tilePos);
+            //foreach (GameObject gameObject in deleteGemes)
+            //{
+            //    Destroy(gameObject);
+            //}
+            //// 리스트 정리
+            //deleteGemes.Clear();
         }
     }
 
-    public void CheckFourMatchesBFS(Vector2Int tilePos, int dir)
+    public void CheckFourMatchesBFS(Vector2Int tilePos)
     {
         // 큐 선언
-        Queue<CustomQueueItem> myQueue = new Queue<CustomQueueItem>();
-
-        Vector2Int myVector = tilePos;
-        int myValue = 0;
+        Queue<Vector2Int> myQueue = new Queue<Vector2Int>();
 
         // 큐에 노드(tilePos) 
-        myQueue.Enqueue(new CustomQueueItem(myVector, myValue));
-        int originQ = tilePos.x;
-        int originR = tilePos.y;
-        BFSVistied[tilePos.x + 10, tilePos.y + 10] = true;
-        
-        while (!myQueue.Any())
-        {
-            int q = myQueue.First().Vec.x;
-            int r = myQueue.First().Vec.y;
-            myQueue.Dequeue();
-            for (int i = 0; i < q; i++)
-            {
-                if (IsInsideGrid(q, r) && HasSameColor(q, r, originQ, originR) && !visited[q + 10, r + 10])
-                {
-                    Vector2Int nextTilePos = new Vector2Int(q,r);
-                    BFSVistied[q,r] = true;
+        myQueue.Enqueue(tilePos);
 
-                    myQueue.Enqueue(new CustomQueueItem(nextTilePos, myValue + 1));
+        // 처음 좌표 q값
+        int originQ = tilePos.x;
+        // 처음 좌표 r값
+        int originR = tilePos.y;
+        // 처음 좌표 방문 처리
+        BFSVisited[tilePos.x + 10, tilePos.y + 10] = true;
+
+        while (myQueue.Any())
+        {
+            int q = myQueue.First().x;
+            int r = myQueue.First().y;
+            myQueue.Dequeue();
+            // 6방향 검사
+            for (int i = 0; i < 6; i++)
+            {
+                // 좌표가 존재하고 && 같은 색의 보석이 존재하고 && 방문하지 않은 상태라면
+                int nextQ = q + dx[i];
+                int nextR = r + dy[i];
+
+                // 방문 체크해주고
+                if (IsInsideGrid(nextQ, nextR) && HasSameColor(q, r, nextQ, nextR) && !BFSVisited[nextQ + 10, nextR + 10])
+                {
+                    Vector2Int nextTilePos = new Vector2Int(nextQ, nextR);
+                    BFSVisited[nextQ+10, nextR+10] = true;
+
+                    // 보석 리스트에 담는다.
+                    deleteGemesBFS.Add(tileScript.Tiles[nextTilePos].GetComponent<TileRay>().color);
+
+                    // 다음 타일 좌표 추가
+                    myQueue.Enqueue(nextTilePos);
                 }
             }
+        }
+    }
+    public void CheckFourMatchesDFS(Vector2Int tilePos)
+    {
+        int q = tilePos.x;
+        int r = tilePos.y;
+
+        for (int i =0; i < 6; i++)
+        {
+            int nextQ = q + dx[i];
+            int nextR = r + dy[i];
+
+            if (IsInsideGrid(nextQ, nextR) && HasSameColor(q, r, nextQ, nextR) && !DFSVisited[nextQ + 10, nextR + 10])
+            {
+                DFSVisited[nextQ + 10, nextR + 10] = true;
+
+                Vector2Int nextTilePos = new Vector2Int(nextQ, nextR);
+
+                deleteGemesDFS.Add(tileScript.Tiles[nextTilePos].GetComponent<TileRay>().color);
+
+                CheckFourMatchesDFS(nextTilePos);
+                if (DFSVisited[q + 10, r +10] == false)
+                {
+                    deleteGemesDFS.RemoveAt(deleteGemesDFS.Count - 1);
+                }
+
+            }
+
         }
     }
 
