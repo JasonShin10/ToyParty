@@ -22,6 +22,8 @@ public class BoardManager : MonoBehaviour
 
     // 움직인 보석
     GameObject originGem;
+
+    Vector2Int originTilePos;
     private void Awake()
     {
         if (!instance)
@@ -56,13 +58,13 @@ public class BoardManager : MonoBehaviour
         {
             // vlaue(보석)으로 key(좌표)찾기
             Vector2Int tilePos = tiles.FirstOrDefault(x => x.Value == hitObject).Key;
-
+            originTilePos = tilePos;
             GameObject tileObject = hitObject;
             // originGem = 움직인 보석(기준)
             originGem = tileObject.GetComponent<TileRay>().color;
             // 기준 보석을 삭제할 보석 리스트에 넣어준다.
             deleteGemes.Add(originGem);
-            deleteGemesBFS.Add(originGem);
+            deleteGemesDFS.Add(originGem);
             // 6가지 방향으로 보석 검사
             //for (int dir = 0; dir < 6; dir++)
             //{
@@ -138,7 +140,7 @@ public class BoardManager : MonoBehaviour
     {
         int q = tilePos.x;
         int r = tilePos.y;
-
+        bool lastTile = false;
         for (int i =0; i < 6; i++)
         {
             int nextQ = q + dx[i];
@@ -146,14 +148,18 @@ public class BoardManager : MonoBehaviour
 
             if (IsInsideGrid(nextQ, nextR) && HasSameColor(q, r, nextQ, nextR) && !DFSVisited[nextQ + 10, nextR + 10])
             {
+                if (!lastTile)
+                {
                 DFSVisited[nextQ + 10, nextR + 10] = true;
+                }
 
                 Vector2Int nextTilePos = new Vector2Int(nextQ, nextR);
 
                 deleteGemesDFS.Add(tileScript.Tiles[nextTilePos].GetComponent<TileRay>().color);
 
                 CheckFourMatchesDFS(nextTilePos);
-                if (DFSVisited[q + 10, r +10] == false)
+                lastTile = true;
+                if (DFSVisited[originTilePos.x + 10, originTilePos.y +10] == false)
                 {
                     deleteGemesDFS.RemoveAt(deleteGemesDFS.Count - 1);
                 }
