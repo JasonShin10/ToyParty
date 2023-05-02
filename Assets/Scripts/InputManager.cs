@@ -78,6 +78,7 @@ public class InputManager : MonoBehaviour
     {
         jamOne = switchJames[0].transform.position;
         jamTwo = switchJames[1].transform.position;
+        
         while (currentTime < maxTime)
         {
             switchJames[0].transform.position = Vector3.Lerp(jamOne, jamTwo, currentTime / maxTime);
@@ -96,4 +97,6 @@ public class InputManager : MonoBehaviour
         currentTime = 0;
         swapping = false;
     }
+
+
 }

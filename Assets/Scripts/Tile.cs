@@ -19,6 +19,8 @@ public class Tile : MonoBehaviour
     public Dictionary<Vector2Int, GameObject> Tiles { get { return tiles; } }
     public Dictionary<Vector2Int, GameObject> Gemes { get { return gemes; } }
 
+    
+
     private void CreateTiles()
     {
         // 6각형의 너비,폭(width)
@@ -66,6 +68,21 @@ public class Tile : MonoBehaviour
                 GameObject jam = Instantiate(jamPrefabs[random]);
                 jam.transform.position = worldPos + new Vector3(0, 0, -0.25f);
                 gemes[axialCoord] = jam;
+                // 배치가 된 잼에서 타일을 판단하는 레이저를 쏘고
+                //GameObject tile = tiles[axialCoord];                                                       
+                bool checkForMatchesBegin = BoardManager.instance.CheckForMatchesBegin(axialCoord);
+                
+                if(!checkForMatchesBegin)
+                {
+                    print("Destroy");
+                    r--;
+                    Destroy(jam);
+                    gemes.Remove(axialCoord);
+                }
+                // 타일에서 쏘는 ray에 보석을 검사할때
+                
+
+                // 일직선인지 아닌지 검사해주는 함수 발동
             }
         }
     }

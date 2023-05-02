@@ -18,8 +18,8 @@ public class Jam : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-       
 
+       
     }
 
     public void FindMyHexagon()
@@ -32,4 +32,6 @@ public class Jam : MonoBehaviour
             BoardManager.instance.CheckForMatches(hitObject);
         }
     }
+
+    
 }
