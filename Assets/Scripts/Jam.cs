@@ -22,16 +22,16 @@ public class Jam : MonoBehaviour
        
     }
 
-    public void FindMyHexagon()
+    public bool FindMyHexagon()
     {
         ray = new Ray(transform.position, transform.up);
         Debug.DrawRay(ray.origin, ray.direction * 1000, Color.blue);
         if (Physics.Raycast(ray, out hit))
         {
             hitObject = hit.transform.gameObject;
-            BoardManager.instance.CheckForMatches(hitObject);
+            bool match = BoardManager.instance.CheckForMatches(hitObject);
+            return match;
         }
-    }
-
-    
+        return false;
+    }    
 }
