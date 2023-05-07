@@ -19,12 +19,13 @@ public class Tile : MonoBehaviour
     public Dictionary<Vector2Int, GameObject> Tiles { get { return tiles; } }
     public Dictionary<Vector2Int, GameObject> Gemes { get { return gemes; } }
 
+    public float width;
     
 
     private void CreateTiles()
     {
         // 6각형의 너비,폭(width)
-        float width = hexPrefab.transform.localScale.y;
+        width = hexPrefab.transform.localScale.y;
         // q는 좌우방향
         for (int q = -3; q <= 3; q++)
         {
@@ -67,6 +68,7 @@ public class Tile : MonoBehaviour
                 int random = Random.Range(0, jamPrefabs.Length);
                 GameObject jam = Instantiate(jamPrefabs[random]);
                 jam.transform.position = worldPos + new Vector3(0, 0, -0.25f);
+                jam.name = string.Format(jam.tag + " " + " {0} , {1}" , q, r);
                 gemes[axialCoord] = jam;
                 // 배치가 된 잼에서 타일을 판단하는 레이저를 쏘고
                 //GameObject tile = tiles[axialCoord];                                                       
@@ -93,5 +95,14 @@ public class Tile : MonoBehaviour
         // 2D 좌표계와 유니티 좌표계의 차이 때문에 y를 뒤집어준다.
         return new Vector3(x, -y, 0);
     }
+    public Vector2Int WorldToAxial(Vector3 worldPos, float width)
+    {
+        float x = worldPos.x / (width * 0.75f);
+        float y = -worldPos.y / (Mathf.Sqrt(3) * width * 0.5f) - (x / 2.0f);
 
+        int q = Mathf.RoundToInt(x);
+        int r = Mathf.RoundToInt(y);
+
+        return new Vector2Int(q, r);
+    }
 }

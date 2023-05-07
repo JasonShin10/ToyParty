@@ -22,7 +22,7 @@ public class BoardManager : MonoBehaviour
     // 위, 오른쪽 위, 오른쪽 아래, 아래, 왼쪽 아래, 왼쪽 위
     int[] dx = { 0, 1, 1, 0, -1, -1 };
     int[] dy = { -1, -1, 0, 1, 1, 0 };
-    
+
     // 일직선 보석 세개 매치 검사
     bool[,] threeVisited;
     // 인접한 네개 보석 매치 검사
@@ -85,11 +85,12 @@ public class BoardManager : MonoBehaviour
     }
     #region 타일 설치 기능 
 
-
     public bool CheckForMatchesBegin(Vector2Int tilePos)
     {
+        // 배열 초기화 
         ResetArray(threeVisited);
         ResetArray(fourVisited);
+
         gemes = tileScript.Gemes;
         match = false;
         // 타일 좌표
@@ -99,9 +100,9 @@ public class BoardManager : MonoBehaviour
             // originGem = 움직인 보석(기준)
 
             originGem = gemes[tilePos];
-
             // 기준 보석을 삭제할 보석 리스트에 넣어준다.
 
+            // 제일 처음 보석 넣어준다.
             deleteGemesThree.Add(originGem);
             deleteGemesFour.Add(originGem);
             // 6가지 방향으로 보석 검사
@@ -222,7 +223,7 @@ public class BoardManager : MonoBehaviour
             {
                 if (gemes[currentTile] && gemes[nextTile])
                 {
-                    if (gemes[currentTile].name == gemes[nextTile].name)
+                    if (gemes[currentTile].tag == gemes[nextTile].tag)
                     {
                         return true;
                     }
@@ -232,21 +233,28 @@ public class BoardManager : MonoBehaviour
         return false;
     }
 
+    
+ 
     #endregion
 
     #region 같은 타일 검색기능
     public bool CheckForMatches(GameObject hitObject)
     {
-        tiles = tileScript.Tiles;
-        gemes = tileScript.Gemes;
         ResetArray(threeVisited);
         ResetArray(fourVisited);
+
+        tiles = tileScript.Tiles;
         match = false;
         if (tiles.ContainsValue(hitObject))
         {
             // vlaue(보석)으로 key(좌표)찾기
+            // 왜 gemes리스트로 안했지?
+            // = 바뀔때 복잡해짐
+
+            // 교체된 타일이 가지고 있는 보석으로 타일 위치(키값)을 찾아야 한다.
             Vector2Int tilePos = tiles.FirstOrDefault(x => x.Value == hitObject).Key;
             originTilePos = tilePos;
+
             GameObject tileObject = hitObject;
             // originGem = 움직인 보석(기준)
             originGem = tileObject.GetComponent<TileRay>().color;
@@ -256,7 +264,7 @@ public class BoardManager : MonoBehaviour
             // 6가지 방향으로 보석 검사
             for (int dir = 0; dir < 6; dir++)
             {
-                // dfs 같은 보석이 일직선에 3개 같은지 검사
+                // 같은 보석이 일직선에 3개 같은지 검사
                 CheckThreeMatchesDFS(tilePos, dir);
                 // 반대 direction 방향 
                 int oppositeDir = (dir + 3) % 6;
@@ -270,12 +278,6 @@ public class BoardManager : MonoBehaviour
                 }
                 else
                 {
-            foreach (GameObject a in deleteGemesThree)
-            {
-                        print(a.name);
-                Vector2Int tileWhere = gemes.FirstOrDefault(x => x.Value == a).Key;
-                print("Three" + tileWhere);
-            }
                     deleteGemes.AddRange(deleteGemesThree);
                     deleteGemesThree.Clear();
                     deleteGemesThree.Add(originGem);
@@ -283,15 +285,8 @@ public class BoardManager : MonoBehaviour
             }
             // 6가지 방향 검사가 끝나고 3개 이상 있으면
             // 없애준다.
-            //CheckFourMatchesBFS(tilePos);
-            match = false;
             deleteGemesThree.Clear();
             CheckFourMatchesDFS(tilePos, 0);
-            foreach (GameObject a in deleteGemesFour)
-            {
-                Vector2Int tileWhere = gemes.FirstOrDefault(x => x.Value == a).Key;
-                print("BackTracking" + tileWhere);
-            }
             deleteGemes.AddRange(deleteGemesFour);
             if (deleteGemes.Count >= 3)
             {
@@ -324,7 +319,7 @@ public class BoardManager : MonoBehaviour
     {
         int q = tilePos.x;
         int r = tilePos.y;
-        print(q + " " + r);
+        //print(q + " " + r);
         // 처음 좌표 체크
         fourVisited[q + 10, r + 10] = true;
 
@@ -344,8 +339,7 @@ public class BoardManager : MonoBehaviour
                 Vector2Int nextTilePos = new Vector2Int(nextQ, nextR);
 
                 deleteGemesFour.Add(tileScript.Tiles[nextTilePos].GetComponent<TileRay>().color);
-                //print("deleteGemesFour" + deleteGemesFour.Count);
-                //print(match);
+
                 CheckFourMatchesDFS(nextTilePos, depth + 1);
 
                 // 처음으로 돌아오지 않았다면
@@ -454,7 +448,7 @@ public class BoardManager : MonoBehaviour
 
             if (currentTileRay != null && currentTileRay.color != null && nextTileRay != null && nextTileRay.color != null)
             {
-                if (currentTileRay.color.name == nextTileRay.color.name)
+                if (currentTileRay.color.tag == nextTileRay.color.tag)
                 {
                     return true;
                 }
@@ -477,6 +471,7 @@ public class BoardManager : MonoBehaviour
     //}
     private bool backPosOne = false;
     private bool backPosTwo = false;
+
     public void HandleGemSwap(List<GameObject> inputSwitchGemes)
     {
         // 여기 클래스 switchGemes로 옮겨준뒤
@@ -495,9 +490,11 @@ public class BoardManager : MonoBehaviour
  
     public IEnumerator JamPosChange()
     {
+        // 선택된 보석과 두번째 보석 위치정보
         jamOne = switchGemes[0].transform.position;
         jamTwo = switchGemes[1].transform.position;
 
+        // 설정된 시간만큼 위치를 교환한다.
         while (currentTime < maxTime)
         {
             switchGemes[0].transform.position = Vector3.Lerp(jamOne, jamTwo, currentTime / maxTime);
@@ -505,17 +502,20 @@ public class BoardManager : MonoBehaviour
             currentTime += Time.deltaTime;
             yield return null;
         }
+        // 두 보석의 교환을 완전하게 마무리 하게끔 위치를 바꿔준다(lerp)로 인해 완전히 안바뀔수도 있다.
         switchGemes[0].transform.position = jamTwo;
         switchGemes[1].transform.position = jamOne;
+
+
         for (int i = 0; i < switchGemes.Count; i++)
         {
             switchGemes[i].GetComponent<Jam>().touched = false;
         }
         backPosOne = switchGemes[0].GetComponent<Jam>().FindMyHexagon();
-        //backPosTwo = switchGemes[1].GetComponent<Jam>().FindMyHexagon();   
+        backPosTwo = switchGemes[1].GetComponent<Jam>().FindMyHexagon();
         currentTime = 0;
         // 보석 교환 작업이 완료되었음
-        if (!backPosOne)
+        if (!backPosOne && !backPosTwo)
         { 
             jamOne = switchGemes[0].transform.position;
             jamTwo = switchGemes[1].transform.position;
@@ -535,8 +535,36 @@ public class BoardManager : MonoBehaviour
             }
             currentTime = 0;
         }
+        else
+        {
+            // 딕셔너리 보석 바꾸는 함수
+        Vector2Int tilePosOne = tileScript.WorldToAxial(jamOne, tileScript.width);
+        Vector2Int tilePosTwo = tileScript.WorldToAxial(jamTwo, tileScript.width);
+        print(tilePosOne);
+        print(tilePosTwo);
+        GameObject gemOne = gemes[tilePosOne];
+        GameObject gemTwo = gemes[tilePosTwo];
+        print(gemes[tilePosOne]);
+        print(gemes[tilePosTwo]);
+        gemes[tilePosOne] = gemTwo;
+        gemes[tilePosTwo] = gemOne;
+        gemes[tilePosOne].name = string.Format(gemTwo.tag + " " + " {0} , {1}", tilePosOne.x, tilePosOne.y);
+        gemes[tilePosTwo].name = string.Format(gemOne.tag + " " + " {0} , {1}", tilePosTwo.x, tilePosTwo.y);        
+        print(gemes[tilePosOne]);
+        print(gemes[tilePosTwo]);
+        }
         swapping = false;
         switchGemes.Clear();
+    }
+
+    private void SwapGemes(Vector2Int tilePos, GameObject geme)
+    {
+        Vector2Int tilePosOne = tileScript.WorldToAxial(jamOne, tileScript.width);
+        Vector2Int tilePosTwo = tileScript.WorldToAxial(jamTwo, tileScript.width);
+        GameObject gemOne = gemes[tilePosOne];
+        GameObject gemTwo = gemes[tilePosTwo];
+        gemes[tilePosOne] = gemTwo;
+        gemes[tilePosTwo] = gemOne;
     }
 
     public void ResetJamSelection()
