@@ -29,8 +29,8 @@ public class Jam : MonoBehaviour
         if (Physics.Raycast(ray, out hit))
         {
             hitObject = hit.transform.gameObject;
-            bool match = BoardManager.instance.CheckForMatches(hitObject);
-            return match;
+            //bool match = BoardManager.instance.CheckForMatches(hitObject);
+            //return match;
         }
         return false;
     }    

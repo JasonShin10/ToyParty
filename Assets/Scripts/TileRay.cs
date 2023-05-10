@@ -27,8 +27,7 @@ public class TileRay : MonoBehaviour
 
         
         if (Physics.Raycast(ray, out hit))
-        {
-            
+        {            
             color = hit.transform.gameObject;
             //print(color);
         }

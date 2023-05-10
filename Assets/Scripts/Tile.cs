@@ -6,7 +6,7 @@ public class Tile : MonoBehaviour
     [SerializeField] private GameObject hexPrefab;
     [SerializeField] private GameObject[] jamPrefabs;
 
-    private Dictionary<Vector2Int, GameObject> tiles = new Dictionary<Vector2Int, GameObject>();
+ 
     private Dictionary<Vector2Int, GameObject> gemes = new Dictionary<Vector2Int, GameObject>();
 
     private void Start()
@@ -16,11 +16,10 @@ public class Tile : MonoBehaviour
         CreateJams();
     }
 
-    public Dictionary<Vector2Int, GameObject> Tiles { get { return tiles; } }
+
     public Dictionary<Vector2Int, GameObject> Gemes { get { return gemes; } }
 
     public float width;
-    
 
     private void CreateTiles()
     {
@@ -48,7 +47,7 @@ public class Tile : MonoBehaviour
                 GameObject tile = Instantiate(hexPrefab);
                 tile.transform.position = worldPos;
                 tile.name = string.Format("Tile {0} , {1}", q, r);
-                tiles[axialCoord] = tile;
+                //tiles[axialCoord] = tile;
             }
         }
     }
@@ -72,8 +71,9 @@ public class Tile : MonoBehaviour
                 gemes[axialCoord] = jam;
                 // 배치가 된 잼에서 타일을 판단하는 레이저를 쏘고
                 //GameObject tile = tiles[axialCoord];                                                       
-                bool checkForMatchesBegin = BoardManager.instance.CheckForMatchesBegin(axialCoord);
+                bool checkForMatchesBegin = BoardManager.instance.CheckForMatches(axialCoord);
                 
+                // false이면
                 if(!checkForMatchesBegin)
                 {
                     print("Destroy");
