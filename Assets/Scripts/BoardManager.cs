@@ -22,16 +22,17 @@ public class BoardManager : MonoBehaviour
     bool[,] fourVisited;
 
     // 일직선 보석, 네개 보석 담는 리스트
-    public List<Vector2Int> deleteGemesThreeVec = new List<Vector2Int>();
-    public List<Vector2Int> deleteGemesFourVec = new List<Vector2Int>();
-    public List<Vector2Int> deleteGemesVec = new List<Vector2Int>();
+    public List<Vector2Int> deleteGemsThreeVec = new List<Vector2Int>();
+    public List<Vector2Int> deleteGemsFourVec = new List<Vector2Int>();
+    public List<Vector2Int> deleteGemsVec = new List<Vector2Int>();
 
     // 보석 두개가 바뀔때 담는 리스트
-    public List<GameObject> switchGemes = new List<GameObject>();
-    public List<GameObject> switchGemesBefore = new List<GameObject>();
+    public List<GameObject> switchGems = new List<GameObject>();
 
-    Dictionary<Vector2Int, GameObject> gemes;
-
+    Dictionary<Vector2Int, GameObject> gems;
+    Dictionary<GameObject, Vector2Int> gemPositions;
+    List<Vector2Int> deleteGemesVecDuplicate;
+    List<GameObject> moveGems = new List<GameObject>();
     // 인접한 네개의 보석이 백트래킹 탐색을 끝낸후 자기 자신에게 되돌아 왔는지 판단 해주는 변수
     bool match = false;
 
@@ -84,13 +85,14 @@ public class BoardManager : MonoBehaviour
         ResetArray(threeVisited);
         ResetArray(fourVisited);
 
-        gemes = tileScript.Gemes;
+        gems = tileScript.Gems;
+        gemPositions = tileScript.GemPositions;
         match = false;
         originTilePos = tilePos;
-        if (gemes[tilePos])
+        if (gems[tilePos])
         {
-            deleteGemesThreeVec.Add(tilePos);
-            deleteGemesFourVec.Add(tilePos);
+            deleteGemsThreeVec.Add(tilePos);
+            deleteGemsFourVec.Add(tilePos);
             // 6가지 방향으로 보석 검사
             for (int dir = 0; dir < 6; dir++)
             {
@@ -99,42 +101,54 @@ public class BoardManager : MonoBehaviour
                 CheckThreeMatchesDFS(tilePos, oppositeDir);
 
                 // 한방향으로 보석이 3개 이하면 성립이 안되므로 다음 방향 검사때를 위해 초기화
-                if (deleteGemesThreeVec.Count < 3)
+                if (deleteGemsThreeVec.Count < 3)
                 {
-                    deleteGemesThreeVec.Clear();
-                    deleteGemesThreeVec.Add(tilePos);
+                    deleteGemsThreeVec.Clear();
+                    deleteGemsThreeVec.Add(tilePos);
                 }
                 else
                 {
-                    deleteGemesVec.AddRange(deleteGemesThreeVec);
-                    deleteGemesThreeVec.Clear();
-                    deleteGemesThreeVec.Add(tilePos);
+                    deleteGemsVec.AddRange(deleteGemsThreeVec);
+                    deleteGemsThreeVec.Clear();
+                    deleteGemsThreeVec.Add(tilePos);
                 }
             }
             // 6가지 방향 검사가 끝나고 3개 이상 있으면
             // 없애준다.
-            deleteGemesThreeVec.Clear();
+            deleteGemsThreeVec.Clear();
             CheckFourMatchesDFS(tilePos, 0);
-            deleteGemesVec.AddRange(deleteGemesFourVec);
+            deleteGemsVec.AddRange(deleteGemsFourVec);
 
-            if (deleteGemesVec.Count >= 3)
+            if (deleteGemsVec.Count >= 3)
             {
                 if (scriptName != "Tile")
                 {
-                    foreach (Vector2Int pos in deleteGemesVec)
+                    deleteGemesVecDuplicate = deleteGemsVec.Distinct().ToList();
+                    foreach (Vector2Int pos in deleteGemesVecDuplicate)
                     {
-                        Destroy(gemes[pos]);
-                        GemesRefill(pos);
+                        moveGems.Add(gems[pos]);
                     }
-                }           
-                deleteGemesVec.Clear();
-                deleteGemesFourVec.Clear();
+                    foreach (GameObject gem in moveGems)
+                    {
+                        if (gemPositions.ContainsKey(gem)) // check if the key exists in the dictionary
+                        {
+                            Vector3 emptyPos = gem.transform.position;
+                            Destroy(gem);
+                            print("Destroy" + gem);
+                            GemesRefill(gemPositions[gem], emptyPos);
+                        }
+                    }
+
+                    deleteGemesVecDuplicate.Clear();
+                }
+                deleteGemsVec.Clear();
+                deleteGemsFourVec.Clear();
                 return false;
             }
             else
             {
-                deleteGemesVec.Clear();
-                deleteGemesFourVec.Clear();
+                deleteGemsVec.Clear();
+                deleteGemsFourVec.Clear();
                 return true;
             }
         }
@@ -156,7 +170,7 @@ public class BoardManager : MonoBehaviour
             threeVisited[nextQ + 10, nextR + 10] = true;
 
             Vector2Int nextTilePos = new Vector2Int(nextQ, nextR);
-            deleteGemesThreeVec.Add(nextTilePos);
+            deleteGemsThreeVec.Add(nextTilePos);
             CheckThreeMatchesDFS(nextTilePos, dir);
         }
     }
@@ -181,13 +195,13 @@ public class BoardManager : MonoBehaviour
                 fourVisited[nextQ + 10, nextR + 10] = true;
 
                 Vector2Int nextTilePos = new Vector2Int(nextQ, nextR);
-                deleteGemesFourVec.Add(nextTilePos);
+                deleteGemsFourVec.Add(nextTilePos);
                 CheckFourMatchesDFS(nextTilePos, depth + 1);
 
                 if (match == false)
                 {
                     fourVisited[nextQ + 10, nextR + 10] = false;
-                    deleteGemesFourVec.RemoveAt(deleteGemesFourVec.Count - 1);
+                    deleteGemsFourVec.RemoveAt(deleteGemsFourVec.Count - 1);
                 }
             }
         }
@@ -200,11 +214,11 @@ public class BoardManager : MonoBehaviour
             Vector2Int nextTile = new Vector2Int(row2, col2);
 
             // Check if the keys are present in the 'gemes' dictionary
-            if (gemes.ContainsKey(currentTile) && gemes.ContainsKey(nextTile))
+            if (gems.ContainsKey(currentTile) && gems.ContainsKey(nextTile))
             {
-                if (gemes[currentTile] && gemes[nextTile])
+                if (gems[currentTile] && gems[nextTile])
                 {
-                    if (gemes[currentTile].tag == gemes[nextTile].tag)
+                    if (gems[currentTile].tag == gems[nextTile].tag)
                     {
                         return true;
                     }
@@ -216,7 +230,7 @@ public class BoardManager : MonoBehaviour
     private bool IsInsideGrid(int nextQ, int nextR)
     {
         Vector2Int nextTile = new Vector2Int(nextQ, nextR);
-        return (tileScript.Gemes.ContainsKey(nextTile));
+        return (tileScript.Gems.ContainsKey(nextTile));
     }
     #endregion
 
@@ -230,115 +244,141 @@ public class BoardManager : MonoBehaviour
 
     public void HandleGemSwap(List<GameObject> inputSwitchGemes)
     {
-        scriptName = this.GetType().Name;  
-        // 여기 클래스 switchGemes로 옮겨준뒤
-        switchGemes = inputSwitchGemes;
-        switchGemesBefore = inputSwitchGemes;
-        // 갯수가 2개이고 && 교환 중이 아니라면?
-        if (switchGemes.Count == 2 && !swapping)
+        scriptName = this.GetType().Name;
+        switchGems = inputSwitchGemes;
+        
+        if (switchGems.Count == 2 && !swapping)
         {
             StartCoroutine(JamPosChange());
-            // 교환작업이 한번만 실행하게끔 
             swapping = true;
-            // 같은 색이 매치되지않으면?
         }
     }
 
     public IEnumerator JamPosChange()
     {
         // 선택된 보석과 두번째 보석 위치정보
-        jamOne = switchGemes[0].transform.position;
-        jamTwo = switchGemes[1].transform.position;
+        jamOne = switchGems[0].transform.position;
+        jamTwo = switchGems[1].transform.position;
 
         // 설정된 시간만큼 위치를 교환한다.
         while (currentTime < maxTime)
         {
-            switchGemes[0].transform.position = Vector3.Lerp(jamOne, jamTwo, currentTime / maxTime);
-            switchGemes[1].transform.position = Vector3.Lerp(jamTwo, jamOne, currentTime / maxTime);
+            switchGems[0].transform.position = Vector3.Lerp(jamOne, jamTwo, currentTime / maxTime);
+            switchGems[1].transform.position = Vector3.Lerp(jamTwo, jamOne, currentTime / maxTime);
             currentTime += Time.deltaTime;
             yield return null;
         }
         // 두 보석의 교환을 완전하게 마무리 하게끔 위치를 바꿔준다(lerp)로 인해 완전히 안바뀔수도 있다.
-        switchGemes[0].transform.position = jamTwo;
-        switchGemes[1].transform.position = jamOne;
+        switchGems[0].transform.position = jamTwo;
+        switchGems[1].transform.position = jamOne;
 
-        for (int i = 0; i < switchGemes.Count; i++)
+        for (int i = 0; i < switchGems.Count; i++)
         {
-            switchGemes[i].GetComponent<Jam>().touched = false;
+            switchGems[i].GetComponent<Jam>().touched = false;
         }
+        // 서로의 딕셔너리 값 바꿔준다.
         Vector2Int tilePosOne = tileScript.WorldToAxial(jamOne, tileScript.width);
         Vector2Int tilePosTwo = tileScript.WorldToAxial(jamTwo, tileScript.width);
-        GameObject gemOne = gemes[tilePosOne];
-        GameObject gemTwo = gemes[tilePosTwo];
-        gemes[tilePosOne] = gemTwo;
-        gemes[tilePosTwo] = gemOne;
-        gemes[tilePosOne].name = string.Format(gemTwo.tag + " " + " {0} , {1}", tilePosOne.x, tilePosOne.y);
-        gemes[tilePosTwo].name = string.Format(gemOne.tag + " " + " {0} , {1}", tilePosTwo.x, tilePosTwo.y);
+        GameObject gemOne = gems[tilePosOne];
+        GameObject gemTwo = gems[tilePosTwo];
+        gems[tilePosOne] = gemTwo;
+        gemPositions[gemTwo] = tilePosOne;
+        gems[tilePosTwo] = gemOne;
+        gemPositions[gemOne] = tilePosTwo;
+        gems[tilePosOne].name = string.Format(gemTwo.tag + " " + " {0} , {1}", tilePosOne.x, tilePosOne.y);
+        gems[tilePosTwo].name = string.Format(gemOne.tag + " " + " {0} , {1}", tilePosTwo.x, tilePosTwo.y);
         backPosOne = CheckForMatches(tilePosOne);
+
         backPosTwo = CheckForMatches(tilePosTwo);
 
         currentTime = 0;
         // 보석 교환 작업이 완료되었음
-        if (!backPosOne && !backPosTwo)
+        // 둘다 매치가 안되었다면
+        if (backPosOne && backPosTwo)
         {
-            jamOne = switchGemes[0].transform.position;
-            jamTwo = switchGemes[1].transform.position;
+            jamOne = switchGems[0].transform.position;
+            jamTwo = switchGems[1].transform.position;
 
             while (currentTime < maxTime)
             {
-                switchGemes[0].transform.position = Vector3.Lerp(jamOne, jamTwo, currentTime / maxTime);
-                switchGemes[1].transform.position = Vector3.Lerp(jamTwo, jamOne, currentTime / maxTime);
+                switchGems[0].transform.position = Vector3.Lerp(jamOne, jamTwo, currentTime / maxTime);
+                switchGems[1].transform.position = Vector3.Lerp(jamTwo, jamOne, currentTime / maxTime);
                 currentTime += Time.deltaTime;
                 yield return null;
             }
-            switchGemes[0].transform.position = jamTwo;
-            switchGemes[1].transform.position = jamOne;
-            for (int i = 0; i < switchGemes.Count; i++)
+            switchGems[0].transform.position = jamTwo;
+            switchGems[1].transform.position = jamOne;
+            for (int i = 0; i < switchGems.Count; i++)
             {
-                switchGemes[i].GetComponent<Jam>().touched = false;
+                switchGems[i].GetComponent<Jam>().touched = false;
             }
             currentTime = 0;
-        }
-        else
-        {
-            // 딕셔너리 보석 바꾸는 함수
+            // 매치 안됐으면 다시 바꿔준다.
             tilePosOne = tileScript.WorldToAxial(jamOne, tileScript.width);
-            tilePosTwo = tileScript.WorldToAxial(jamTwo, tileScript.width);         
-            gemOne = gemes[tilePosOne];
-            gemTwo = gemes[tilePosTwo];
-            gemes[tilePosOne] = gemTwo;
-            gemes[tilePosTwo] = gemOne;
-            gemes[tilePosOne].name = string.Format(gemTwo.tag + " " + " {0} , {1}", tilePosOne.x, tilePosOne.y);
-            gemes[tilePosTwo].name = string.Format(gemOne.tag + " " + " {0} , {1}", tilePosTwo.x, tilePosTwo.y);
+            tilePosTwo = tileScript.WorldToAxial(jamTwo, tileScript.width);
+            gemOne = gems[tilePosOne];
+            gemTwo = gems[tilePosTwo];
+            gems[tilePosOne] = gemTwo;
+            gemPositions[gemTwo] = tilePosOne;
+            gems[tilePosTwo] = gemOne;
+            gemPositions[gemOne] = tilePosTwo;
+            gems[tilePosOne].name = string.Format(gemTwo.tag + " " + " {0} , {1}", tilePosOne.x, tilePosOne.y);
+            gems[tilePosTwo].name = string.Format(gemOne.tag + " " + " {0} , {1}", tilePosTwo.x, tilePosTwo.y);
         }
         swapping = false;
-        switchGemes.Clear();
-        
+        switchGems.Clear();
     }
 
-    private void GemesRefill(Vector2Int pos)
+   
+    private void GemesRefill(Vector2Int originPos, Vector3 originEmptyPos)
     {
-        int x = pos.x ;
-        int y = pos.y - 1;
-        Vector2Int upPos = new Vector2Int(x, y);
-        if (deleteGemesVec.Contains(upPos))
+        int x = originPos.x;
+        int y = originPos.y - 1;
+        Vector2Int nextPos = new Vector2Int(x, y);
+
+        if (gems.ContainsKey(nextPos))
+        {
+            GameObject upGeme = gems[nextPos];
+            Vector3 emptyUpPos = gems[nextPos].transform.position;
+            upGeme.transform.position = originEmptyPos;
+            gems[originPos] = upGeme;
+            gemPositions[upGeme] = originPos;
+            gems[originPos].name = string.Format(gems[originPos].tag + " " + " {0} , {1}", x, y+1);
+            // originPos로 이동했으니
+            gems.Remove(nextPos);
+            GemesRefill(nextPos, emptyUpPos);
+        }
+        else
         {
             return;
         }
-        else
-        {
-            //gemes[upPos].transform.position = 
-        }
-    }
 
-    
+    }
+    //while (currentTime < maxTime)
+    //{
+    //    upGeme.transform.position = Vector3.Lerp(upGeme.transform.position, emptyPos, currentTime / maxTime);
+    //    currentTime += Time.deltaTime;
+    //}
+
+    //if (deleteGemesVec.Contains(nextPos))
+    //{
+    //    for (int i = 0; i < deleteGemesVecDuplicate.Count; i++)
+    //    {
+    //        if (deleteGemesVecDuplicate[i] == nextPos && gemes[nextPos].tag == gemes[originPos].tag)
+    //        {
+    //            deleteGemesVecDuplicate[i] = originPos;
+    //        }
+    //    }
+    //}
     public void ResetJamSelection()
     {
-        for (int i = 0; i < switchGemes.Count; i++)
+        for (int i = 0; i < switchGems.Count; i++)
         {
-            switchGemes[i].GetComponent<Jam>().touched = false;
+            switchGems[i].GetComponent<Jam>().touched = false;
         }
-        switchGemes.Clear();
+        switchGems.Clear();
         swapping = false;
     }
 }
+
+// 다 지우고 나서 해야한다.
