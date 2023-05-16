@@ -31,6 +31,7 @@ public class BoardManager : MonoBehaviour
 
     Dictionary<Vector2Int, GameObject> gems;
     Dictionary<GameObject, Vector2Int> gemPositions;
+
     List<Vector2Int> deleteGemesVecDuplicate;
     List<GameObject> moveGems = new List<GameObject>();
     // 인접한 네개의 보석이 백트래킹 탐색을 끝낸후 자기 자신에게 되돌아 왔는지 판단 해주는 변수
@@ -135,7 +136,7 @@ public class BoardManager : MonoBehaviour
                             Vector3 emptyPos = gem.transform.position;
                             Destroy(gem);
                             print("Destroy" + gem);
-                            GemesRefill(gemPositions[gem], emptyPos);
+                            GemsRefill(gemPositions[gem], emptyPos);
                         }
                     }
 
@@ -330,7 +331,7 @@ public class BoardManager : MonoBehaviour
     }
 
    
-    private void GemesRefill(Vector2Int originPos, Vector3 originEmptyPos)
+    private void GemsRefill(Vector2Int originPos, Vector3 originEmptyPos)
     {
         int x = originPos.x;
         int y = originPos.y - 1;
@@ -346,7 +347,7 @@ public class BoardManager : MonoBehaviour
             gems[originPos].name = string.Format(gems[originPos].tag + " " + " {0} , {1}", x, y+1);
             // originPos로 이동했으니
             gems.Remove(nextPos);
-            GemesRefill(nextPos, emptyUpPos);
+            GemsRefill(nextPos, emptyUpPos);
         }
         else
         {
@@ -354,22 +355,7 @@ public class BoardManager : MonoBehaviour
         }
 
     }
-    //while (currentTime < maxTime)
-    //{
-    //    upGeme.transform.position = Vector3.Lerp(upGeme.transform.position, emptyPos, currentTime / maxTime);
-    //    currentTime += Time.deltaTime;
-    //}
 
-    //if (deleteGemesVec.Contains(nextPos))
-    //{
-    //    for (int i = 0; i < deleteGemesVecDuplicate.Count; i++)
-    //    {
-    //        if (deleteGemesVecDuplicate[i] == nextPos && gemes[nextPos].tag == gemes[originPos].tag)
-    //        {
-    //            deleteGemesVecDuplicate[i] = originPos;
-    //        }
-    //    }
-    //}
     public void ResetJamSelection()
     {
         for (int i = 0; i < switchGems.Count; i++)

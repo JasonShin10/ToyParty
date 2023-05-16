@@ -4,10 +4,10 @@ using UnityEngine;
 public class Tile : MonoBehaviour
 {
     [SerializeField] private GameObject hexPrefab;
-    [SerializeField] private GameObject[] gemePrefabs;
+    [SerializeField] private GameObject[] gemPrefabs;
 
-    private Dictionary<Vector2Int, GameObject> gemes = new Dictionary<Vector2Int, GameObject>();
-    private Dictionary<GameObject, Vector2Int> vecs = new Dictionary<GameObject, Vector2Int>();
+    private Dictionary<Vector2Int, GameObject> gems = new Dictionary<Vector2Int, GameObject>();
+    private Dictionary<GameObject, Vector2Int> gemPositions = new Dictionary<GameObject, Vector2Int>();
     
     private void Start()
     {
@@ -16,8 +16,8 @@ public class Tile : MonoBehaviour
         CreateJams();
     }
 
-    public Dictionary<Vector2Int, GameObject> Gemes { get { return gemes; } }
-    public Dictionary<GameObject, Vector2Int> Vecs { get { return vecs; } }
+    public Dictionary<Vector2Int, GameObject> Gems { get { return gems; } }
+    public Dictionary<GameObject, Vector2Int> GemPositions { get { return gemPositions; } }
     public float width;
 
     private void CreateTiles()
@@ -63,12 +63,12 @@ public class Tile : MonoBehaviour
             {
                 Vector2Int axialCoord = new Vector2Int(q, r);
                 Vector3 worldPos = AxialToWorld(axialCoord, scaleY);
-                int random = Random.Range(0, gemePrefabs.Length);
-                GameObject geme = Instantiate(gemePrefabs[random]);
+                int random = Random.Range(0, gemPrefabs.Length);
+                GameObject geme = Instantiate(gemPrefabs[random]);
                 geme.transform.position = worldPos + new Vector3(0, 0, -0.25f);
                 geme.name = string.Format(geme.tag + " " + " {0} , {1}" , q, r);
-                gemes[axialCoord] = geme;
-                vecs[geme] = axialCoord;
+                gems[axialCoord] = geme;
+                gemPositions[geme] = axialCoord;
                 // 배치가 된 잼에서 타일을 판단하는 레이저를 쏘고
                 //GameObject tile = tiles[axialCoord];                                                       
                 bool checkForMatchesBegin = BoardManager.instance.CheckForMatches(axialCoord);
@@ -79,8 +79,8 @@ public class Tile : MonoBehaviour
                     print("Destroy");
                     r--;
                     Destroy(geme);
-                    gemes.Remove(axialCoord);
-                    vecs.Remove(geme);
+                    gems.Remove(axialCoord);
+                    gemPositions.Remove(geme);
                 }
                 // 타일에서 쏘는 ray에 보석을 검사할때
                 
