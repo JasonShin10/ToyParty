@@ -74,7 +74,7 @@ public class GameManager : MonoBehaviour
         {
             switchJames[i].GetComponent<Jam>().touched = false;
         }
-        switchJames[0].GetComponent<Jam>().FindMyHexagon();
+        //switchJames[0].GetComponent<Jam>().FindMyHexagon();
         switchJames.Clear();
         currentTime = 0;
         swapping = false;

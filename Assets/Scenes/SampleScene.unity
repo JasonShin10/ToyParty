@@ -152,7 +152,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5749ced282a31a4cbed86690aec5d78, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  deleteGemes: []
+  deleteGemsThreeMatches: []
+  deleteGemsFourMatches: []
+  deleteGemsFinal: []
+  switchGems: []
+  swapping: 0
 --- !u!4 &20675467
 Transform:
   m_ObjectHideFlags: 0
@@ -306,6 +310,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a0c9ddd1ea37f84d961a08788b42a5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  switchGemes: []
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
@@ -383,7 +388,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.23, y: 2.36, z: -12.14}
+  m_LocalPosition: {x: 0, y: 0, z: -6.16}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -466,13 +471,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hexPrefab: {fileID: 8353257499173491693, guid: 301ff26f15b3be941aac8e36be330ade, type: 3}
-  jamPrefabs:
+  gemPrefabs:
   - {fileID: 6432494338466471439, guid: 6878463249bb72b4a94ec92c34481102, type: 3}
   - {fileID: 1399484139477114491, guid: 9c53bafffd107dd4ca0ded6616b24586, type: 3}
   - {fileID: 4813781993027875259, guid: 50ba0e6846c5c1046b2896dbd5da2a49, type: 3}
   - {fileID: 6745200877052959017, guid: 95980492177b2d841a0e2ad85c79f92a, type: 3}
   - {fileID: 3542079777815370484, guid: 863f71c8ac8276946b728aeb324eba76, type: 3}
   - {fileID: 157855701710782653, guid: b89d882d540b8224f85eee87cd706df8, type: 3}
+  width: 0
 --- !u!1 &1369039775
 GameObject:
   m_ObjectHideFlags: 0

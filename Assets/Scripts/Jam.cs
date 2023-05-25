@@ -6,9 +6,10 @@ public class Jam : MonoBehaviour
 {
 
     public bool touched = false;
-    Ray ray;
-    RaycastHit hit;
+
     public GameObject hitObject;
+    private float currentTime = 0;
+    private float maxTime = 1f;
     // Start is called before the first frame update
     void Start()
     {
@@ -19,19 +20,27 @@ public class Jam : MonoBehaviour
     void Update()
     {
 
-       
+
     }
 
-    public bool FindMyHexagon()
-    {
-        ray = new Ray(transform.position, transform.up);
-        Debug.DrawRay(ray.origin, ray.direction * 1000, Color.blue);
-        if (Physics.Raycast(ray, out hit))
-        {
-            hitObject = hit.transform.gameObject;
-            //bool match = BoardManager.instance.CheckForMatches(hitObject);
-            //return match;
-        }
-        return false;
-    }    
+    //public IEnumerator moveGem(Vector3 targetPos)
+    //{
+    //    while (currentTime < maxTime)
+    //    {
+    //        if (gameObject == !inhe)
+    //        {
+    //            yield break; // Exit the coroutine if the object has been destroyed
+    //        }
+
+    //        Vector3 myPos = gameObject.transform.position;
+    //        gameObject.transform.position = Vector3.Lerp(myPos, targetPos, currentTime / maxTime);
+    //        currentTime += Time.deltaTime;
+    //        yield return null;
+    //    }
+    //    if (gameObject != null)
+    //    {
+    //        gameObject.transform.position = targetPos;
+    //        currentTime = 0;
+    //    }
+    //}
 }

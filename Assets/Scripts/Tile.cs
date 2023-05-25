@@ -14,6 +14,7 @@ public class Tile : MonoBehaviour
         BoardManager.instance.RegisterTileScript(this);
         CreateTiles();
         CreateJams();
+        CreateRefillGem();
     }
 
     public Dictionary<Vector2Int, GameObject> Gems { get { return gems; } }
@@ -64,11 +65,11 @@ public class Tile : MonoBehaviour
                 Vector2Int axialCoord = new Vector2Int(q, r);
                 Vector3 worldPos = AxialToWorld(axialCoord, scaleY);
                 int random = Random.Range(0, gemPrefabs.Length);
-                GameObject geme = Instantiate(gemPrefabs[random]);
-                geme.transform.position = worldPos + new Vector3(0, 0, -0.25f);
-                geme.name = string.Format(geme.tag + " " + " {0} , {1}" , q, r);
-                gems[axialCoord] = geme;
-                gemPositions[geme] = axialCoord;
+                GameObject gem = Instantiate(gemPrefabs[random]);
+                gem.transform.position = worldPos + new Vector3(0, 0, -0.25f);
+                gem.name = string.Format(gem.tag + " " + " {0} , {1}" , q, r);
+                gems[axialCoord] = gem;
+                gemPositions[gem] = axialCoord;
                 // 배치가 된 잼에서 타일을 판단하는 레이저를 쏘고
                 //GameObject tile = tiles[axialCoord];                                                       
                 bool checkForMatchesBegin = BoardManager.instance.CheckForMatches(axialCoord);
@@ -78,17 +79,29 @@ public class Tile : MonoBehaviour
                 {
                     print("Destroy");
                     r--;
-                    Destroy(geme);
+                    Destroy(gem);
                     gems.Remove(axialCoord);
-                    gemPositions.Remove(geme);
+                    gemPositions.Remove(gem);
                 }
                 // 타일에서 쏘는 ray에 보석을 검사할때
-                
-
                 // 일직선인지 아닌지 검사해주는 함수 발동
             }
         }
+        
     }
+
+    private void CreateRefillGem()
+    {
+        float scaleY = hexPrefab.transform.localScale.y;
+        Vector2Int axialCoord = new Vector2Int(0, -4);
+        Vector3 worldPos = AxialToWorld(axialCoord, scaleY);
+        int random = Random.Range(0, gemPrefabs.Length);
+        GameObject gem = Instantiate(gemPrefabs[random]);
+        gem.transform.position = worldPos + new Vector3(0, 0, -0.25f);
+        gem.name = string.Format(gem.tag + " " + " {0} , {1}" , 0, -4);
+        gems[axialCoord] = gem;
+    }
+
     private Vector3 AxialToWorld(Vector2Int axialCoord, float width)
     {
         float x = axialCoord.x * width * 0.75f;
