@@ -35,6 +35,7 @@ public class BoardManager : MonoBehaviour
     public List<GameObject> switchGems = new List<GameObject>();
 
     bool match = false;
+    // 기본함수의 순서를 Awake -> Start 순으로 함수 라이프사이클과 맞추는 것이 좋은 코드 습관을 가지신 것 같습니다.
     private void Awake()
     {
         if (!instance)
@@ -64,6 +65,7 @@ public class BoardManager : MonoBehaviour
         tileScript = tile;
         scriptName = tile.GetType().Name;
     }
+
     // 배열 초기화 함수
     void ResetArray(bool[,] array)
     {
@@ -75,6 +77,10 @@ public class BoardManager : MonoBehaviour
             }
         }
     }
+
+    // region 사이의 줄간격와 메서드 사이의 줄간격을 일정하게 유지하는 것이 좋습니다.
+    // 팀 단위 작업이라면 팀의 코드 스타일을 따르는 것이 좋으며, 개인 작업일 때도 본인만의 스타일을 구축해나가는 것이 가독성 측면에서 유리합니다.
+
     #region check matches function 
 
     // 인접한 네개의 보석이 백트래킹 탐색을 끝낸후 자기 자신에게 되돌아 왔는지 판단 해주는 변수
@@ -118,6 +124,11 @@ public class BoardManager : MonoBehaviour
             FourMatches(tilePos, 0);
             deleteGemsFinal.AddRange(deleteGemsFourMatches);
 
+            // 아래와 같이 여러 조건문과 반복문이 있을 경우 한 눈에 코드가 들어오지 않습니다.
+            // 여러 조건문과 반복문이 섞일 경우 주석을 달아주는 것이 좋습니다.
+            //
+            // else return에 중괄호를 달아주시는 건 코드를 일관적으로 보이게 하는 부분이라 좋았습니다!
+            // 조건문, 반복문의 코드를 보니 중괄호의 사용, 줄바꿈 등의 코드 스타일이 일관적이어서 가독성이 높았습니다.
             List<Vector2Int> deleteGemesVecDuplicate;
             List<GameObject> moveGems = new List<GameObject>();
             if (deleteGemsFinal.Count >= 3)
@@ -138,9 +149,9 @@ public class BoardManager : MonoBehaviour
                         if (gemPositions.ContainsKey(gem))
                         {
                             Vector3 emptyPos = gem.transform.position;
-                            Destroy(gem);
-                            print("Destroy" + gem);
+                            Destroy(gem.gameObject);
                             GemsRefill(gemPositions[gem], emptyPos);
+                            print("Destroy" + gem);
                         }
                     }
                     deleteGemsFinal.Clear();
@@ -167,6 +178,7 @@ public class BoardManager : MonoBehaviour
             return true;
         }
     }
+
     public void ThreeMatches(Vector2Int tilePos, int dir)
     {
         int q = tilePos.x;
@@ -183,6 +195,7 @@ public class BoardManager : MonoBehaviour
             ThreeMatches(nextTilePos, dir);
         }
     }
+
     public void FourMatches(Vector2Int tilePos, int depth)
     {
         int q = tilePos.x;
@@ -215,6 +228,7 @@ public class BoardManager : MonoBehaviour
             }
         }
     }
+
     private bool HasSameColor(int row1, int col1, int row2, int col2)
     {
         if (IsInsideGrid(row2, col2))
@@ -236,17 +250,19 @@ public class BoardManager : MonoBehaviour
         }
         return false;
     }
+
     private bool IsInsideGrid(int nextQ, int nextR)
     {
         Vector2Int nextTile = new Vector2Int(nextQ, nextR);
         return (tileScript.Gems.ContainsKey(nextTile));
     }
     #endregion
+
     #region tile swap fuction
     private float currentTime = 0;
     private float maxTime = 1f;
     public bool swapping = false;
-
+    // Jam, Gem, Geme 등의 용어혼용이 있습니다. 통일해주시면 좋을 것 같습니다!
     public void HandleGemSwap(List<GameObject> inputSwitchGemes)
     {
         scriptName = this.GetType().Name;
@@ -257,7 +273,6 @@ public class BoardManager : MonoBehaviour
             swapping = true;
         }
     }
-
 
     public IEnumerator GemPosChange()
     {
@@ -304,6 +319,8 @@ public class BoardManager : MonoBehaviour
 
     private IEnumerator SwapGems(Vector3 posOne, Vector3 posTwo)
     {
+        // 코루틴에서 시간 관련 작업을 하실 때 Time.deltaTime을 사용하시기 보다는
+        // yield return new Waitfortime(n)을 사용하시는 게 효율적으로 보입니다.
         // 설정된 시간만큼 위치를 교환한다.
         while (currentTime < maxTime)
         {
@@ -351,25 +368,27 @@ public class BoardManager : MonoBehaviour
     }
 
     #endregion
+
     List<GameObject> refillGems = new List<GameObject>();
     private void GemsRefill(Vector2Int originPos, Vector3 originEmptyPos)
     {
         int x = originPos.x;
         int y = originPos.y - 1;
         Vector2Int nextPos = new Vector2Int(x, y);
-        if (gems.ContainsKey(nextPos))
+
+
+        if (gems.ContainsKey(nextPos) && gems[nextPos] && gems[nextPos].GetComponent<Jam>())
         {
             GameObject upGeme = gems[nextPos];
-            //StartCoroutine(upGeme.GetComponent<Jam>().moveGem(originEmptyPos));
             Vector3 emptyUpPos = gems[nextPos].transform.position;
-            upGeme.transform.position = originEmptyPos;
             gems[originPos] = upGeme;
             gemPositions[upGeme] = originPos;
             gems[originPos].name = string.Format(gems[originPos].tag + " " + " {0} , {1}", x, y + 1);
-            // originPos로 이동했으니
+            // originPos로 이동했으니 
             gems.Remove(nextPos);
             refillGems.Add(upGeme);
             GemsRefill(nextPos, emptyUpPos);
+            StartCoroutine(upGeme.GetComponent<Jam>().MoveGem(originEmptyPos));
         }
         else
         {

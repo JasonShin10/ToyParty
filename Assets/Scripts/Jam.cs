@@ -4,12 +4,10 @@ using UnityEngine;
 
 public class Jam : MonoBehaviour
 {
-
     public bool touched = false;
 
     public GameObject hitObject;
-    private float currentTime = 0;
-    private float maxTime = 1f;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -23,24 +21,23 @@ public class Jam : MonoBehaviour
 
     }
 
-    //public IEnumerator moveGem(Vector3 targetPos)
-    //{
-    //    while (currentTime < maxTime)
-    //    {
-    //        if (gameObject == !inhe)
-    //        {
-    //            yield break; // Exit the coroutine if the object has been destroyed
-    //        }
+    // 젬을 targerPos로 일정 속도로 이동시키는 코루틴
+    public IEnumerator MoveGem(Vector3 targetPos)
+    {
+        float speed = 0.01f;
 
-    //        Vector3 myPos = gameObject.transform.position;
-    //        gameObject.transform.position = Vector3.Lerp(myPos, targetPos, currentTime / maxTime);
-    //        currentTime += Time.deltaTime;
-    //        yield return null;
-    //    }
-    //    if (gameObject != null)
-    //    {
-    //        gameObject.transform.position = targetPos;
-    //        currentTime = 0;
-    //    }
-    //}
+        while (this != null && transform.position != targetPos)
+        {
+            // If the game object has been destroyed, stop the coroutine.
+            if (gameObject == null)
+            {
+                yield break;
+            }
+
+            transform.position = Vector2.MoveTowards(transform.position, targetPos, speed);
+            yield return new WaitForEndOfFrame();
+        }
+    }
+
+   
 }
