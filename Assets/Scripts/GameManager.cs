@@ -32,7 +32,7 @@ public class GameManager : MonoBehaviour
             {
                 if (hit.transform.gameObject.layer == LayerMask.NameToLayer("Jam") && switchJames.Count < 2)
                 {
-                    hit.transform.GetComponent<Jam>().touched = true;
+                    hit.transform.GetComponent<Gem>().touched = true;
                     if (!switchJames.Contains(hit.transform.gameObject))
                     {
                         switchJames.Add(hit.transform.gameObject);
@@ -50,7 +50,7 @@ public class GameManager : MonoBehaviour
         {
             for (int i = 0; i < switchJames.Count; i++)
             {
-                switchJames[i].GetComponent<Jam>().touched = false;
+                switchJames[i].GetComponent<Gem>().touched = false;
             }
             switchJames.Clear();
             swapping = false;
@@ -72,7 +72,7 @@ public class GameManager : MonoBehaviour
         switchJames[1].transform.position = jamOne;
         for (int i = 0; i < switchJames.Count; i++)
         {
-            switchJames[i].GetComponent<Jam>().touched = false;
+            switchJames[i].GetComponent<Gem>().touched = false;
         }
         //switchJames[0].GetComponent<Jam>().FindMyHexagon();
         switchJames.Clear();

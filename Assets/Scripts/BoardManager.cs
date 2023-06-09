@@ -339,7 +339,7 @@ public class BoardManager : MonoBehaviour
     {
         for (int i = 0; i < switchGems.Count; i++)
         {
-            switchGems[i].GetComponent<Jam>().touched = false;
+            switchGems[i].GetComponent<Gem>().touched = false;
         }
     }
 
@@ -361,7 +361,7 @@ public class BoardManager : MonoBehaviour
     {
         for (int i = 0; i < switchGems.Count; i++)
         {
-            switchGems[i].GetComponent<Jam>().touched = false;
+            switchGems[i].GetComponent<Gem>().touched = false;
         }
         switchGems.Clear();
         swapping = false;
@@ -370,29 +370,35 @@ public class BoardManager : MonoBehaviour
     #endregion
 
     List<GameObject> refillGems = new List<GameObject>();
+
     private void GemsRefill(Vector2Int originPos, Vector3 originEmptyPos)
     {
         int x = originPos.x;
         int y = originPos.y - 1;
         Vector2Int nextPos = new Vector2Int(x, y);
 
-
-        if (gems.ContainsKey(nextPos) && gems[nextPos] && gems[nextPos].GetComponent<Jam>())
+        if (gems.ContainsKey(nextPos) && gems[nextPos] && gems[nextPos].GetComponent<Gem>())
         {
-            GameObject upGeme = gems[nextPos];
+            GameObject upGem = gems[nextPos];
             Vector3 emptyUpPos = gems[nextPos].transform.position;
-            gems[originPos] = upGeme;
-            gemPositions[upGeme] = originPos;
+            upGem.transform.position = originEmptyPos;
+            gems[originPos] = upGem;
+            gemPositions[upGem] = originPos;
             gems[originPos].name = string.Format(gems[originPos].tag + " " + " {0} , {1}", x, y + 1);
-            // originPos로 이동했으니 
             gems.Remove(nextPos);
-            refillGems.Add(upGeme);
+            refillGems.Add(upGem);
             GemsRefill(nextPos, emptyUpPos);
-            StartCoroutine(upGeme.GetComponent<Jam>().MoveGem(originEmptyPos));
+            StartCoroutine(upGem.GetComponent<Gem>().MoveGem(originEmptyPos));
         }
         else
         {
             return;
         }
     }
+    // GameObject UPGEM에 UP보석 저장
+    // Vector3 UP위치 에 UP보석 위치저장
+    // GEMS 원래위치 = UP보석
+    // GESPOSITIONS UP보석 = 원래위치
+    // GEMS 위에 보석 = 제거
+    // 
 }

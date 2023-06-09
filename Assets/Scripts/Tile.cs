@@ -5,7 +5,7 @@ public class Tile : MonoBehaviour
 {
     [SerializeField] private GameObject hexPrefab;
     [SerializeField] private GameObject[] gemPrefabs;
-
+    [SerializeField] private GameObject Gem;
     private Dictionary<Vector2Int, GameObject> gems = new Dictionary<Vector2Int, GameObject>();
     private Dictionary<GameObject, Vector2Int> gemPositions = new Dictionary<GameObject, Vector2Int>();
     
@@ -44,7 +44,7 @@ public class Tile : MonoBehaviour
                 Vector2Int axialCoord = new Vector2Int(q, r);
                 // 축 좌표를 월드 좌표로 변환한다.
                 Vector3 worldPos = AxialToWorld(axialCoord, width);
-                GameObject tile = Instantiate(hexPrefab);
+                GameObject tile = Instantiate(hexPrefab,transform);
                 tile.transform.position = worldPos;
                 tile.name = string.Format("Tile {0} , {1}", q, r);
                 //tiles[axialCoord] = tile;
@@ -65,7 +65,7 @@ public class Tile : MonoBehaviour
                 Vector2Int axialCoord = new Vector2Int(q, r);
                 Vector3 worldPos = AxialToWorld(axialCoord, scaleY);
                 int random = Random.Range(0, gemPrefabs.Length);
-                GameObject gem = Instantiate(gemPrefabs[random]);
+                GameObject gem = Instantiate(gemPrefabs[random],Gem.transform);
                 gem.transform.position = worldPos + new Vector3(0, 0, -0.25f);
                 gem.name = string.Format(gem.tag + " " + " {0} , {1}" , q, r);
                 gems[axialCoord] = gem;
@@ -77,7 +77,7 @@ public class Tile : MonoBehaviour
                 // false이면
                 if(!checkForMatchesBegin)
                 {
-                    print("Destroy");
+                    
                     r--;
                     Destroy(gem);
                     gems.Remove(axialCoord);
@@ -96,7 +96,7 @@ public class Tile : MonoBehaviour
         Vector2Int axialCoord = new Vector2Int(0, -4);
         Vector3 worldPos = AxialToWorld(axialCoord, scaleY);
         int random = Random.Range(0, gemPrefabs.Length);
-        GameObject gem = Instantiate(gemPrefabs[random]);
+        GameObject gem = Instantiate(gemPrefabs[random],Gem.transform);
         gem.transform.position = worldPos + new Vector3(0, 0, -0.25f);
         gem.name = string.Format(gem.tag + " " + " {0} , {1}" , 0, -4);
         gems[axialCoord] = gem;

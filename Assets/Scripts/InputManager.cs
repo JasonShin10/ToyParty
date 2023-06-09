@@ -43,7 +43,7 @@ public class InputManager : MonoBehaviour
         {
             if (hit.transform.gameObject.layer == LayerMask.NameToLayer("Jam") && switchGemes.Count < 2)
             {
-                hit.transform.GetComponent<Jam>().touched = true;
+                hit.transform.GetComponent<Gem>().touched = true;
                 if (!switchGemes.Contains(hit.transform.gameObject))
                 {
                     switchGemes.Add(hit.transform.gameObject);
