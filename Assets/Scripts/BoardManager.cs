@@ -400,5 +400,5 @@ public class BoardManager : MonoBehaviour
     // GEMS 원래위치 = UP보석
     // GESPOSITIONS UP보석 = 원래위치
     // GEMS 위에 보석 = 제거
-    // 
+    
 }
