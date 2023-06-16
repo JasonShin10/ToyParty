@@ -1,43 +1,42 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Xml.Serialization;
 using UnityEngine;
 
 public class Gem : MonoBehaviour
 {
-    public bool touched = false;
+    public delegate void MoveAction(Vector3 targetPos);
 
+    public MoveAction OnMove;
+
+    public bool touched = false;
     public GameObject hitObject;
+    public float speed = 0.01f;
+    public bool moving = false;
+    public Vector3 targetPos;
 
     // Start is called before the first frame update
     void Start()
     {
-
+        OnMove = DoMove;
     }
 
     // Update is called once per frame
     void Update()
     {
-
-
-    }
-
-    // 젬을 targerPos로 일정 속도로 이동시키는 코루틴
-    public IEnumerator MoveGem(Vector3 targetPos)
-    {
-        float speed = 0.01f;
-
-        while (this != null && transform.position != targetPos)
+        if (moving)
         {
-            // If the game object has been destroyed, stop the coroutine.
-            if (gameObject == null)
-            {
-                yield break;
-            }
-
-            transform.position = Vector2.MoveTowards(transform.position, targetPos, speed);
-            yield return new WaitForEndOfFrame();
+            OnMove(targetPos);
         }
     }
 
-   
+    public void DoMove(Vector3 targetPos)
+    {
+        transform.position = Vector2.MoveTowards(transform.position, targetPos, speed);
+        if(transform.position == targetPos)
+        {
+            moving = false;
+        }
+    }
+
 }

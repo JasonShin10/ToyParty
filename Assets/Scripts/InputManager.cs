@@ -38,10 +38,10 @@ public class InputManager : MonoBehaviour
     private void CheckRaycastHit()
     {
         ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        int layerMask = 1 << LayerMask.NameToLayer("Jam");
+        int layerMask = Utility.GetGameLayers(new string[] { Constant.LAYER_NAME_GEM });
         if (Physics.Raycast(ray, out hit, layerMask))
         {
-            if (hit.transform.gameObject.layer == LayerMask.NameToLayer("Jam") && switchGemes.Count < 2)
+            if (hit.transform.gameObject.layer == LayerMask.NameToLayer(Constant.LAYER_NAME_GEM) && switchGemes.Count < 2)
             {
                 hit.transform.GetComponent<Gem>().touched = true;
                 if (!switchGemes.Contains(hit.transform.gameObject))

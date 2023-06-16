@@ -150,6 +150,10 @@ public class BoardManager : MonoBehaviour
                         {
                             Vector3 emptyPos = gem.transform.position;
                             Destroy(gem.gameObject);
+
+                            // To do : Destory 연출 실행
+                            //gem.PlayDestroyAnimation();
+
                             GemsRefill(gemPositions[gem], emptyPos);
                             print("Destroy" + gem);
                         }
@@ -276,8 +280,6 @@ public class BoardManager : MonoBehaviour
 
     public IEnumerator GemPosChange()
     {
-
-
         // Swap the positions of the gems
         Vector3 gemOne = switchGems[0].transform.position;
         Vector3 gemTwo = switchGems[1].transform.position;
@@ -314,7 +316,6 @@ public class BoardManager : MonoBehaviour
     //    switchGems[0].GetComponent<Jam>().moveGem(gemTwoPos);
     //    switchGems[1].GetComponent<Jam>().moveGem(gemOnePos);
     //    yield return null;
-
     //}
 
     private IEnumerator SwapGems(Vector3 posOne, Vector3 posTwo)
@@ -387,8 +388,11 @@ public class BoardManager : MonoBehaviour
             gems[originPos].name = string.Format(gems[originPos].tag + " " + " {0} , {1}", x, y + 1);
             gems.Remove(nextPos);
             refillGems.Add(upGem);
+            upGem.GetComponent<Gem>().targetPos = originEmptyPos;
+            upGem.GetComponent<Gem>().moving = true;
+            
             GemsRefill(nextPos, emptyUpPos);
-            StartCoroutine(upGem.GetComponent<Gem>().MoveGem(originEmptyPos));
+            
         }
         else
         {
