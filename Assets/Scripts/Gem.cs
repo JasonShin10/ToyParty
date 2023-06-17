@@ -9,7 +9,7 @@ public class Gem : MonoBehaviour
     public delegate void MoveAction(Vector3 targetPos);
 
     public MoveAction OnMove;
-    public event Action onMoveComplete;
+    public event Action OnMoveComplete;
 
     public bool touched = false;
     public GameObject hitObject;
@@ -56,7 +56,7 @@ public class Gem : MonoBehaviour
         if(transform.position == targetPos)
         {
             moving = false;
-            onMoveComplete?.Invoke();
+            OnMoveComplete?.Invoke();
         }
     }
 
