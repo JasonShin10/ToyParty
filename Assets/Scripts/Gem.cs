@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml.Serialization;
@@ -8,6 +9,7 @@ public class Gem : MonoBehaviour
     public delegate void MoveAction(Vector3 targetPos);
 
     public MoveAction OnMove;
+    public event Action onMoveComplete;
 
     public bool touched = false;
     public GameObject hitObject;
@@ -30,12 +32,31 @@ public class Gem : MonoBehaviour
         }
     }
 
+    private void OnEnable()
+    {
+        OnMove += DoMove;
+    }
+
+    private void OnDisable()
+    {
+        OnMove -= DoMove;
+    }
+
+    public void TriggerMove()
+    {
+        if (moving)
+        {
+            OnMove?.Invoke(targetPos);
+        }
+    }
+
     public void DoMove(Vector3 targetPos)
     {
         transform.position = Vector2.MoveTowards(transform.position, targetPos, speed);
         if(transform.position == targetPos)
         {
             moving = false;
+            onMoveComplete?.Invoke();
         }
     }
 

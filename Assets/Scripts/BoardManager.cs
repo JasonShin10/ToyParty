@@ -1,4 +1,5 @@
 using Newtonsoft.Json.Bson;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -266,7 +267,6 @@ public class BoardManager : MonoBehaviour
     private float currentTime = 0;
     private float maxTime = 1f;
     public bool swapping = false;
-    // Jam, Gem, Geme 등의 용어혼용이 있습니다. 통일해주시면 좋을 것 같습니다!
     public void HandleGemSwap(List<GameObject> inputSwitchGemes)
     {
         scriptName = this.GetType().Name;
@@ -390,19 +390,22 @@ public class BoardManager : MonoBehaviour
             refillGems.Add(upGem);
             upGem.GetComponent<Gem>().targetPos = originEmptyPos;
             upGem.GetComponent<Gem>().moving = true;
-            
-            GemsRefill(nextPos, emptyUpPos);
-            
-        }
-        else
-        {
-            return;
+
+            // 이동 완료 이벤트에 대한 콜백 함수를 선언합니다. 
+            // 이 콜백 함수가 이벤트에서 제거되어야 하기 때문에, 람다 표현식을 변수에 할당합니다.
+            Action moveCompleteHandler = null;
+            moveCompleteHandler = () =>
+            {
+                // 이동 완료 이벤트에서 콜백 함수를 제거합니다. 이렇게 하면 이 콜백 함수가 한 번만 실행됩니다.
+                upGem.GetComponent<Gem>().OnMoveComplete -= moveCompleteHandler;
+                // 보석이 이동을 완료하면 다음 보석을 이동시킵니다.
+                GemsRefill(nextPos, emptyUpPos);
+            };
+
+            // 이동 완료 이벤트에 콜백 함수를 등록합니다.
+            upGem.GetComponent<Gem>().OnMoveComplete += moveCompleteHandler;
+            // 보석을 이동시킵니다.
+            upGem.GetComponent<Gem>().TriggerMove();
         }
     }
-    // GameObject UPGEM에 UP보석 저장
-    // Vector3 UP위치 에 UP보석 위치저장
-    // GEMS 원래위치 = UP보석
-    // GESPOSITIONS UP보석 = 원래위치
-    // GEMS 위에 보석 = 제거
-    
 }
