@@ -21,14 +21,14 @@ public class InputManager : MonoBehaviour
 
     void CheckInput()
     {
-        // º¸¼®À» ´­·¶À»¶§
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         if (Input.GetMouseButton(0))
         {
             CheckRaycastHit();
         }       
         BoardManager.instance.HandleGemSwap(switchGemes);
 
-        // ¼ÕÀ» ¶ÂÀ»¶§ º¸¼®À» ´Ù½Ã µÇµ¹¸°´Ù.
+        // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ù½ï¿½ ï¿½Çµï¿½ï¿½ï¿½ï¿½ï¿½.
         if (Input.GetMouseButtonUp(0) && switchGemes.Count != 2)
         {
             BoardManager.instance.ResetJamSelection();

@@ -14,50 +14,28 @@ public class Gem : MonoBehaviour
     public bool touched = false;
     public GameObject hitObject;
     public float speed = 0.01f;
-    public bool moving = false;
+    public bool isMoving = false;
     public Vector3 targetPos;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        OnMove = DoMove;
-    }
 
-    // Update is called once per frame
     void Update()
     {
-        if (moving)
+        if(isMoving)
         {
-            OnMove(targetPos);
+            transform.position = Vector2.Lerp(transform.position, targetPos, 0.1f); 
+            isMoving = Vector2.Distance(transform.position, targetPos) > 0.001f;
+            if(!isMoving)
+            {
+                OnMoveComplete?.Invoke();
+                OnMoveComplete = null;
+            }
         }
     }
 
-    private void OnEnable()
+    public void MoveAnimationPresent(Vector3 targetPos, System.Action onAnimationComplete = null)
     {
-        OnMove += DoMove;
+        isMoving = true;
+        this.targetPos = targetPos;
+        OnMoveComplete += onAnimationComplete;
     }
-
-    private void OnDisable()
-    {
-        OnMove -= DoMove;
-    }
-
-    public void TriggerMove()
-    {
-        if (moving)
-        {
-            OnMove?.Invoke(targetPos);
-        }
-    }
-
-    public void DoMove(Vector3 targetPos)
-    {
-        transform.position = Vector2.MoveTowards(transform.position, targetPos, speed);
-        if(transform.position == targetPos)
-        {
-            moving = false;
-            OnMoveComplete?.Invoke();
-        }
-    }
-
 }

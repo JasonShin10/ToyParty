@@ -8,7 +8,7 @@ using TMPro.EditorUtilities;
 using UnityEngine;
 using UnityEngine.tvOS;
 
-// List tile ¾ø¾îµµ µÉµí
+// List tile ï¿½ï¿½ï¿½îµµ ï¿½Éµï¿½
 public class BoardManager : MonoBehaviour
 {
     public static BoardManager instance;
@@ -16,7 +16,7 @@ public class BoardManager : MonoBehaviour
     private Tile tileScript;
     private string scriptName;
 
-    // À§, ¿À¸¥ÂÊ À§, ¿À¸¥ÂÊ ¾Æ·¡, ¾Æ·¡, ¿ÞÂÊ ¾Æ·¡, ¿ÞÂÊ À§
+    // ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Æ·ï¿½, ï¿½Æ·ï¿½, ï¿½ï¿½ï¿½ï¿½ ï¿½Æ·ï¿½, ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½
     int[] dx = { 0, 1, 1, 0, -1, -1 };
     int[] dy = { -1, -1, 0, 1, 1, 0 };
 
@@ -30,13 +30,13 @@ public class BoardManager : MonoBehaviour
     Dictionary<Vector2Int, GameObject> gems;
     Dictionary<GameObject, Vector2Int> gemPositions;
 
-    // Ã³À½ ½ÃÀÛÇÑ Å¸ÀÏ Å°°ª
+    // Ã³ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Å¸ï¿½ï¿½ Å°ï¿½ï¿½
     Vector2Int originTilePos;
-    // º¸¼® µÎ°³°¡ ¹Ù²ð¶§ ´ã´Â ¸®½ºÆ®
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½Î°ï¿½ï¿½ï¿½ ï¿½Ù²ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ®
     public List<GameObject> switchGems = new List<GameObject>();
 
     bool match = false;
-    // ±âº»ÇÔ¼öÀÇ ¼ø¼­¸¦ Awake -> Start ¼øÀ¸·Î ÇÔ¼ö ¶óÀÌÇÁ»çÀÌÅ¬°ú ¸ÂÃß´Â °ÍÀÌ ÁÁÀº ÄÚµå ½À°üÀ» °¡Áö½Å °Í °°½À´Ï´Ù.
+    // ï¿½âº»ï¿½Ô¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Awake -> Start ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¬ï¿½ï¿½ ï¿½ï¿½ï¿½ß´ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Úµï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.
     private void Awake()
     {
         if (!instance)
@@ -48,7 +48,7 @@ public class BoardManager : MonoBehaviour
 
     void Start()
     {
-        // ¹è¿­ °ø°£ ¼³Á¤
+        // ï¿½è¿­ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         threeVisited = new bool[100, 100];
         fourVisited = new bool[100, 100];
 
@@ -60,14 +60,14 @@ public class BoardManager : MonoBehaviour
 
     }
 
-    // TileClass ¹Þ¾Æ¿À´Â ÇÔ¼ö
+    // TileClass ï¿½Þ¾Æ¿ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½
     public void RegisterTileScript(Tile tile)
     {
         tileScript = tile;
         scriptName = tile.GetType().Name;
     }
 
-    // ¹è¿­ ÃÊ±âÈ­ ÇÔ¼ö
+    // ï¿½è¿­ ï¿½Ê±ï¿½È­ ï¿½Ô¼ï¿½
     void ResetArray(bool[,] array)
     {
         for (int i = 0; i < array.GetLength(0); i++)
@@ -79,15 +79,17 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    // region »çÀÌÀÇ ÁÙ°£°Ý¿Í ¸Þ¼­µå »çÀÌÀÇ ÁÙ°£°ÝÀ» ÀÏÁ¤ÇÏ°Ô À¯ÁöÇÏ´Â °ÍÀÌ ÁÁ½À´Ï´Ù.
-    // ÆÀ ´ÜÀ§ ÀÛ¾÷ÀÌ¶ó¸é ÆÀÀÇ ÄÚµå ½ºÅ¸ÀÏÀ» µû¸£´Â °ÍÀÌ ÁÁÀ¸¸ç, °³ÀÎ ÀÛ¾÷ÀÏ ¶§µµ º»ÀÎ¸¸ÀÇ ½ºÅ¸ÀÏÀ» ±¸ÃàÇØ³ª°¡´Â °ÍÀÌ °¡µ¶¼º Ãø¸é¿¡¼­ À¯¸®ÇÕ´Ï´Ù.
+    // region ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ù°ï¿½ï¿½Ý¿ï¿½ ï¿½Þ¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ù°ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.
+    // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Û¾ï¿½ï¿½Ì¶ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Úµï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ ï¿½Û¾ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Î¸ï¿½ï¿½ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ø³ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½é¿¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Õ´Ï´ï¿½.
 
     #region check matches function 
 
-    // ÀÎÁ¢ÇÑ ³×°³ÀÇ º¸¼®ÀÌ ¹éÆ®·¡Å· Å½»öÀ» ³¡³½ÈÄ ÀÚ±â ÀÚ½Å¿¡°Ô µÇµ¹¾Æ ¿Ô´ÂÁö ÆÇ´Ü ÇØÁÖ´Â º¯¼ö
-    public bool CheckForMatches(Vector2Int tilePos)
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½×°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ®ï¿½ï¿½Å· Å½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ú±ï¿½ ï¿½Ú½Å¿ï¿½ï¿½ï¿½ ï¿½Çµï¿½ï¿½ï¿½ ï¿½Ô´ï¿½ï¿½ï¿½ ï¿½Ç´ï¿½ ï¿½ï¿½ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½ï¿½
+    public bool CheckForMatches(Vector2Int tilePos, out List<Vector2Int> destroyedPositions)
     {
-        // ¹è¿­ ÃÊ±âÈ­ 
+        destroyedPositions = new List<Vector2Int>();
+
+        // ï¿½è¿­ ï¿½Ê±ï¿½È­ 
         ResetArray(threeVisited);
         ResetArray(fourVisited);
 
@@ -99,14 +101,14 @@ public class BoardManager : MonoBehaviour
         {
             deleteGemsThreeMatches.Add(tilePos);
             deleteGemsFourMatches.Add(tilePos);
-            // 6°¡Áö ¹æÇâÀ¸·Î º¸¼® °Ë»ç
+            // 6ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ë»ï¿½
             for (int dir = 0; dir < 6; dir++)
             {
                 ThreeMatches(tilePos, dir);
                 int oppositeDir = (dir + 3) % 6;
                 ThreeMatches(tilePos, oppositeDir);
 
-                // ÇÑ¹æÇâÀ¸·Î º¸¼®ÀÌ 3°³ ÀÌÇÏ¸é ¼º¸³ÀÌ ¾ÈµÇ¹Ç·Î ´ÙÀ½ ¹æÇâ °Ë»ç¶§¸¦ À§ÇØ ÃÊ±âÈ­
+                // ï¿½Ñ¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 3ï¿½ï¿½ ï¿½ï¿½ï¿½Ï¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ÈµÇ¹Ç·ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ë»ç¶§ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­
                 if (deleteGemsThreeMatches.Count < 3)
                 {
                     deleteGemsThreeMatches.Clear();
@@ -119,17 +121,17 @@ public class BoardManager : MonoBehaviour
                     deleteGemsThreeMatches.Add(tilePos);
                 }
             }
-            // 6°¡Áö ¹æÇâ °Ë»ç°¡ ³¡³ª°í 3°³ ÀÌ»ó ÀÖÀ¸¸é
-            // ¾ø¾ÖÁØ´Ù.
+            // 6ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ë»ç°¡ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 3ï¿½ï¿½ ï¿½Ì»ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+            // ï¿½ï¿½ï¿½ï¿½ï¿½Ø´ï¿½.
             deleteGemsThreeMatches.Clear();
             FourMatches(tilePos, 0);
             deleteGemsFinal.AddRange(deleteGemsFourMatches);
 
-            // ¾Æ·¡¿Í °°ÀÌ ¿©·¯ Á¶°Ç¹®°ú ¹Ýº¹¹®ÀÌ ÀÖÀ» °æ¿ì ÇÑ ´«¿¡ ÄÚµå°¡ µé¾î¿ÀÁö ¾Ê½À´Ï´Ù.
-            // ¿©·¯ Á¶°Ç¹®°ú ¹Ýº¹¹®ÀÌ ¼¯ÀÏ °æ¿ì ÁÖ¼®À» ´Þ¾ÆÁÖ´Â °ÍÀÌ ÁÁ½À´Ï´Ù.
+            // ï¿½Æ·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ç¹ï¿½ï¿½ï¿½ ï¿½Ýºï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Úµå°¡ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê½ï¿½ï¿½Ï´ï¿½.
+            // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ç¹ï¿½ï¿½ï¿½ ï¿½Ýºï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½Ö¼ï¿½ï¿½ï¿½ ï¿½Þ¾ï¿½ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.
             //
-            // else return¿¡ Áß°ýÈ£¸¦ ´Þ¾ÆÁÖ½Ã´Â °Ç ÄÚµå¸¦ ÀÏ°üÀûÀ¸·Î º¸ÀÌ°Ô ÇÏ´Â ºÎºÐÀÌ¶ó ÁÁ¾Ò½À´Ï´Ù!
-            // Á¶°Ç¹®, ¹Ýº¹¹®ÀÇ ÄÚµå¸¦ º¸´Ï Áß°ýÈ£ÀÇ »ç¿ë, ÁÙ¹Ù²Þ µîÀÇ ÄÚµå ½ºÅ¸ÀÏÀÌ ÀÏ°üÀûÀÌ¾î¼­ °¡µ¶¼ºÀÌ ³ô¾Ò½À´Ï´Ù.
+            // else returnï¿½ï¿½ ï¿½ß°ï¿½È£ï¿½ï¿½ ï¿½Þ¾ï¿½ï¿½Ö½Ã´ï¿½ ï¿½ï¿½ ï¿½Úµå¸¦ ï¿½Ï°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì°ï¿½ ï¿½Ï´ï¿½ ï¿½Îºï¿½ï¿½Ì¶ï¿½ ï¿½ï¿½ï¿½Ò½ï¿½ï¿½Ï´ï¿½!
+            // ï¿½ï¿½ï¿½Ç¹ï¿½, ï¿½Ýºï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Úµå¸¦ ï¿½ï¿½ï¿½ï¿½ ï¿½ß°ï¿½È£ï¿½ï¿½ ï¿½ï¿½ï¿½, ï¿½Ù¹Ù²ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Úµï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ï¿½ï¿½ ï¿½Ï°ï¿½ï¿½ï¿½ï¿½Ì¾î¼­ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ò½ï¿½ï¿½Ï´ï¿½.
             List<Vector2Int> deleteGemesVecDuplicate;
             List<GameObject> moveGems = new List<GameObject>();
             if (deleteGemsFinal.Count >= 3)
@@ -151,21 +153,23 @@ public class BoardManager : MonoBehaviour
                         {
                             Vector3 emptyPos = gem.transform.position;
                             Destroy(gem.gameObject);
+                            destroyedPositions.Add(gemPositions[gem]);
+                            
 
-                            // To do : Destory ¿¬Ãâ ½ÇÇà
+                            // To do : Destory ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
                             //gem.PlayDestroyAnimation();
 
-                            GemsRefill(gemPositions[gem], emptyPos);
+                            GemsRefill(gemPositions[gem]);
                             print("Destroy" + gem);
                         }
                     }
-                    deleteGemsFinal.Clear();
-                    deleteGemsFourMatches.Clear();
-                    List<GameObject> refillGemsCopy = new List<GameObject>(refillGems);
-                    foreach (GameObject gem in refillGemsCopy)
-                    {
-                        CheckForMatches(gemPositions[gem]);
-                    }
+                    //deleteGemsFinal.Clear();
+                    //deleteGemsFourMatches.Clear();
+                    //List<GameObject> refillGemsCopy = new List<GameObject>(refillGems);
+                    //foreach (GameObject gem in refillGemsCopy)
+                    //{
+                    //    CheckForMatches(gemPositions[gem]);
+                    //}
                 }
                 deleteGemsFinal.Clear();
                 deleteGemsFourMatches.Clear();
@@ -278,6 +282,8 @@ public class BoardManager : MonoBehaviour
         }
     }
 
+    private bool isPlayingAnimation = false;
+
     public IEnumerator GemPosChange()
     {
         // Swap the positions of the gems
@@ -290,15 +296,45 @@ public class BoardManager : MonoBehaviour
 
         UpdateGemPositions(gemOne, gemTwo);
 
-        // ¼­·ÎÀÇ µñ¼Å³Ê¸® °ª ¹Ù²ãÁØ´Ù.
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å³Ê¸ï¿½ ï¿½ï¿½ ï¿½Ù²ï¿½ï¿½Ø´ï¿½.
         Vector2Int tilePosOne = tileScript.WorldToAxial(gemOne, tileScript.width);
         Vector2Int tilePosTwo = tileScript.WorldToAxial(gemTwo, tileScript.width);
 
-        bool backPosOne = CheckForMatches(tilePosOne);
-        bool backPosTwo = CheckForMatches(tilePosTwo);
+        List<Vector2Int> destroyedPositionsOne = new List<Vector2Int>();
+        List<Vector2Int> destroyedPositionsTwo = new List<Vector2Int>();
+        bool backPosOne = CheckForMatches(tilePosOne, destroyedPositionsOne);
+        bool backPosTwo = CheckForMatches(tilePosTwo, destroyedPositionsTwo);
 
-        // º¸¼® ±³È¯ ÀÛ¾÷ÀÌ ¿Ï·áµÇ¾úÀ½
-        // µÑ´Ù ¸ÅÄ¡°¡ ¾ÈµÇ¾ú´Ù¸é
+        while(backPosOne || backPosTwo)
+        {
+            if(backPosOne)
+            {
+                foreach(var gemPos in destroyedPositionsOne)
+                {
+                    List<GameObject> refillGemsCopy = new List<GameObject>(refillGems);
+                    foreach (GameObject gem in refillGemsCopy)
+                    {
+                        CheckForMatches(gemPositions[gem]);
+                    }
+                }
+            }
+            
+            if(backPosTwo)
+            {
+                foreach(var gemPos in destroyedPositionsTwo)
+                {
+                    CheckForMatches(gemPos, out var );
+                }
+            }
+
+            destroyedPositionsOne = new List<Vector2Int>();
+            destroyedPositionsTwo = new List<Vector2Int>();
+            backPosOne = CheckForMatches(tilePosOne, destroyedPositionsOne);
+            backPosTwo = CheckForMatches(tilePosTwo, destroyedPositionsTwo);
+        }
+
+        // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¯ ï¿½Û¾ï¿½ï¿½ï¿½ ï¿½Ï·ï¿½Ç¾ï¿½ï¿½ï¿½
+        // ï¿½Ñ´ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ÈµÇ¾ï¿½ï¿½Ù¸ï¿½
         if (backPosOne && backPosTwo)
         {
             yield return SwapGems(gemTwo, gemOne);
@@ -320,9 +356,9 @@ public class BoardManager : MonoBehaviour
 
     private IEnumerator SwapGems(Vector3 posOne, Vector3 posTwo)
     {
-        // ÄÚ·çÆ¾¿¡¼­ ½Ã°£ °ü·Ã ÀÛ¾÷À» ÇÏ½Ç ¶§ Time.deltaTimeÀ» »ç¿ëÇÏ½Ã±â º¸´Ù´Â
-        // yield return new Waitfortime(n)À» »ç¿ëÇÏ½Ã´Â °Ô È¿À²ÀûÀ¸·Î º¸ÀÔ´Ï´Ù.
-        // ¼³Á¤µÈ ½Ã°£¸¸Å­ À§Ä¡¸¦ ±³È¯ÇÑ´Ù.
+        // ï¿½Ú·ï¿½Æ¾ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Û¾ï¿½ï¿½ï¿½ ï¿½Ï½ï¿½ ï¿½ï¿½ Time.deltaTimeï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï½Ã±ï¿½ ï¿½ï¿½ï¿½Ù´ï¿½
+        // yield return new Waitfortime(n)ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï½Ã´ï¿½ ï¿½ï¿½ È¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ô´Ï´ï¿½.
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ï¿½ï¿½Å­ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½È¯ï¿½Ñ´ï¿½.
         while (currentTime < maxTime)
         {
             switchGems[0].transform.position = Vector3.Lerp(posOne, posTwo, currentTime / maxTime);
@@ -330,7 +366,7 @@ public class BoardManager : MonoBehaviour
             currentTime += Time.deltaTime;
             yield return null;
         }
-        // µÎ º¸¼®ÀÇ ±³È¯À» ¿ÏÀüÇÏ°Ô ¸¶¹«¸® ÇÏ°Ô²û À§Ä¡¸¦ ¹Ù²ãÁØ´Ù(lerp)·Î ÀÎÇØ ¿ÏÀüÈ÷ ¾È¹Ù²ð¼öµµ ÀÖ´Ù.
+        // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¯ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ï°Ô²ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½Ù²ï¿½ï¿½Ø´ï¿½(lerp)ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½È¹Ù²ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½.
         switchGems[0].transform.position = posTwo;
         switchGems[1].transform.position = posOne;
         currentTime = 0;
@@ -372,7 +408,7 @@ public class BoardManager : MonoBehaviour
 
     List<GameObject> refillGems = new List<GameObject>();
 
-    private void GemsRefill(Vector2Int originPos, Vector3 originEmptyPos)
+    private void GemsRefill(Vector2Int originPos)
     {
         int x = originPos.x;
         int y = originPos.y - 1;
@@ -382,30 +418,14 @@ public class BoardManager : MonoBehaviour
         {
             GameObject upGem = gems[nextPos];
             Vector3 emptyUpPos = gems[nextPos].transform.position;
-            upGem.transform.position = originEmptyPos;
+            var gem = upGem.GetComponent<Gem>();
+            gem.MoveAnimationPresent(originPos, () => { GemsRefill(nextPos, emptyUpPos); });
+            //upGem.transform.position = originEmptyPos;
             gems[originPos] = upGem;
             gemPositions[upGem] = originPos;
             gems[originPos].name = string.Format(gems[originPos].tag + " " + " {0} , {1}", x, y + 1);
             gems.Remove(nextPos);
             refillGems.Add(upGem);
-            upGem.GetComponent<Gem>().targetPos = originEmptyPos;
-            upGem.GetComponent<Gem>().moving = true;
-
-            // ÀÌµ¿ ¿Ï·á ÀÌº¥Æ®¿¡ ´ëÇÑ ÄÝ¹é ÇÔ¼ö¸¦ ¼±¾ðÇÕ´Ï´Ù. 
-            // ÀÌ ÄÝ¹é ÇÔ¼ö°¡ ÀÌº¥Æ®¿¡¼­ Á¦°ÅµÇ¾î¾ß ÇÏ±â ¶§¹®¿¡, ¶÷´Ù Ç¥Çö½ÄÀ» º¯¼ö¿¡ ÇÒ´çÇÕ´Ï´Ù.
-            Action moveCompleteHandler = null;
-            moveCompleteHandler = () =>
-            {
-                // ÀÌµ¿ ¿Ï·á ÀÌº¥Æ®¿¡¼­ ÄÝ¹é ÇÔ¼ö¸¦ Á¦°ÅÇÕ´Ï´Ù. ÀÌ·¸°Ô ÇÏ¸é ÀÌ ÄÝ¹é ÇÔ¼ö°¡ ÇÑ ¹ø¸¸ ½ÇÇàµË´Ï´Ù.
-                upGem.GetComponent<Gem>().OnMoveComplete -= moveCompleteHandler;
-                // º¸¼®ÀÌ ÀÌµ¿À» ¿Ï·áÇÏ¸é ´ÙÀ½ º¸¼®À» ÀÌµ¿½ÃÅµ´Ï´Ù.
-                GemsRefill(nextPos, emptyUpPos);
-            };
-
-            // ÀÌµ¿ ¿Ï·á ÀÌº¥Æ®¿¡ ÄÝ¹é ÇÔ¼ö¸¦ µî·ÏÇÕ´Ï´Ù.
-            upGem.GetComponent<Gem>().OnMoveComplete += moveCompleteHandler;
-            // º¸¼®À» ÀÌµ¿½ÃÅµ´Ï´Ù.
-            upGem.GetComponent<Gem>().TriggerMove();
         }
     }
 }

@@ -23,26 +23,26 @@ public class Tile : MonoBehaviour
 
     private void CreateTiles()
     {
-        // 6°¢ÇüÀÇ ³Êºñ,Æø(width)
+        // 6ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Êºï¿½,ï¿½ï¿½(width)
         width = hexPrefab.transform.localScale.y;
-        // q´Â ÁÂ¿ì¹æÇâ
+        // qï¿½ï¿½ ï¿½Â¿ï¿½ï¿½ï¿½ï¿½
         for (int q = -3; q <= 3; q++)
         {
-            // ¼öÁ÷ À¸·Î ½×ÀÌ´Â¾ç
-            // q = -3ÀÏ¶§ r1 = 0
+            // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì´Â¾ï¿½
+            // q = -3ï¿½Ï¶ï¿½ r1 = 0
             // r2 = 3
-            // 3°³ ½×ÀÓ
-            // q = -2 ÀÏ¶§ r1 = -1
+            // 3ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+            // q = -2 ï¿½Ï¶ï¿½ r1 = -1
             // r2 = 3
-            // 4°³ ½×ÀÓ
+            // 4ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
             int r1 = Mathf.Max(-3, -q - 3);
             int r2 = Mathf.Min(3, -q + 3);
 
             for (int r = r1; r < r2; r++)
             {
-                // Ãà ÀÚÇ¥¸¦ »ý¼ºÇÑ´Ù.
+                // ï¿½ï¿½ ï¿½ï¿½Ç¥ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
                 Vector2Int axialCoord = new Vector2Int(q, r);
-                // Ãà ÁÂÇ¥¸¦ ¿ùµå ÁÂÇ¥·Î º¯È¯ÇÑ´Ù.
+                // ï¿½ï¿½ ï¿½ï¿½Ç¥ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ç¥ï¿½ï¿½ ï¿½ï¿½È¯ï¿½Ñ´ï¿½.
                 Vector3 worldPos = AxialToWorld(axialCoord, width);
                 GameObject tile = Instantiate(hexPrefab,transform);
                 tile.transform.position = worldPos;
@@ -70,11 +70,11 @@ public class Tile : MonoBehaviour
                 gem.name = string.Format(gem.tag + " " + " {0} , {1}" , q, r);
                 gems[axialCoord] = gem;
                 gemPositions[gem] = axialCoord;
-                // ¹èÄ¡°¡ µÈ Àë¿¡¼­ Å¸ÀÏÀ» ÆÇ´ÜÇÏ´Â ·¹ÀÌÀú¸¦ ½î°í
+                // ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ ï¿½ë¿¡ï¿½ï¿½ Å¸ï¿½ï¿½ï¿½ï¿½ ï¿½Ç´ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
                 //GameObject tile = tiles[axialCoord];                                                       
-                bool checkForMatchesBegin = BoardManager.instance.CheckForMatches(axialCoord);
+                bool checkForMatchesBegin = BoardManager.instance.CheckForMatches(axialCoord, out var destroyedPositions);
                 
-                // falseÀÌ¸é
+                // falseï¿½Ì¸ï¿½
                 if(!checkForMatchesBegin)
                 {
                     
@@ -83,8 +83,8 @@ public class Tile : MonoBehaviour
                     gems.Remove(axialCoord);
                     gemPositions.Remove(gem);
                 }
-                // Å¸ÀÏ¿¡¼­ ½î´Â ray¿¡ º¸¼®À» °Ë»çÇÒ¶§
-                // ÀÏÁ÷¼±ÀÎÁö ¾Æ´ÑÁö °Ë»çÇØÁÖ´Â ÇÔ¼ö ¹ßµ¿
+                // Å¸ï¿½Ï¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ rayï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ë»ï¿½ï¿½Ò¶ï¿½
+                // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Æ´ï¿½ï¿½ï¿½ ï¿½Ë»ï¿½ï¿½ï¿½ï¿½Ö´ï¿½ ï¿½Ô¼ï¿½ ï¿½ßµï¿½
             }
         }
         
@@ -106,7 +106,7 @@ public class Tile : MonoBehaviour
     {
         float x = axialCoord.x * width * 0.75f;
         float y = (axialCoord.y + (axialCoord.x / 2.0f)) * Mathf.Sqrt(3) * width * 0.5f;
-        // 2D ÁÂÇ¥°è¿Í À¯´ÏÆ¼ ÁÂÇ¥°èÀÇ Â÷ÀÌ ¶§¹®¿¡ y¸¦ µÚÁý¾îÁØ´Ù.
+        // 2D ï¿½ï¿½Ç¥ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ¼ ï¿½ï¿½Ç¥ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ yï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø´ï¿½.
         return new Vector3(x, -y, 0);
     }
     public Vector2Int WorldToAxial(Vector3 worldPos, float width)
