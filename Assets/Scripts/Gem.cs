@@ -21,23 +21,6 @@ public class Gem : MonoBehaviour
 
     }
 
-    // 젬을 targerPos로 일정 속도로 이동시키는 코루틴
-    public IEnumerator MoveGem(Vector3 targetPos)
-    {
-        float speed = 0.01f;
-
-        while (this != null && transform.position != targetPos)
-        {
-            // If the game object has been destroyed, stop the coroutine.
-            if (gameObject == null)
-            {
-                yield break;
-            }
-
-            transform.position = Vector2.MoveTowards(transform.position, targetPos, speed);
-            yield return new WaitForEndOfFrame();
-        }
-    }
 
    
 }
