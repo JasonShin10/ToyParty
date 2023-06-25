@@ -72,10 +72,10 @@ public class Tile : MonoBehaviour
                 gemPositions[gem] = axialCoord;
                 // 배치가 된 잼에서 타일을 판단하는 레이저를 쏘고
                 //GameObject tile = tiles[axialCoord];                                                       
-                bool checkForMatchesBegin = BoardManager.instance.CheckForMatches(axialCoord);
-                
+                bool checkForMatchesBegin = BoardManager.instance.CheckForMatches(axialCoord, out List<GameObject> destroyGems);
+        
                 // false이면
-                if(!checkForMatchesBegin)
+                if (!checkForMatchesBegin)
                 {
                     
                     r--;

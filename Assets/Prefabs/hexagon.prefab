@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 8694036201405598039}
   - component: {fileID: 5694995560669759218}
   - component: {fileID: 7560495940129600056}
-  - component: {fileID: 793689516039450478}
   - component: {fileID: 5963081305859565537}
   m_Layer: 7
   m_Name: hexagon
@@ -85,25 +84,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &793689516039450478
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8353257499173491693}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fd1a00187392114448860cc21582de1f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  blue: 0
-  green: 0
-  red: 0
-  yellow: 0
-  orange: 0
-  purple: 0
-  color: {fileID: 0}
 --- !u!64 &5963081305859565537
 MeshCollider:
   m_ObjectHideFlags: 0
