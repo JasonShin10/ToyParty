@@ -86,7 +86,7 @@ public class BoardManager : MonoBehaviour
     // 인접한 네개의 보석이 백트래킹 탐색을 끝낸후 자기 자신에게 되돌아 왔는지 판단 해주는 변수
     public bool CheckForMatches(Vector2Int tilePos, out List<GameObject> targetDestroyedGems)
     {
-      
+
         targetDestroyedGems = new List<GameObject>();
 
         // 배열 초기화 
@@ -155,10 +155,10 @@ public class BoardManager : MonoBehaviour
                             //Destroy(gem.gameObject);
                             //GemsRefill(gemPositions[gem], emptyPos);
 
-                            
+
                             targetDestroyedGems.Add(gem);
 
-                            
+
                             print("Destroy" + gem);
                         }
                     }
@@ -301,21 +301,30 @@ public class BoardManager : MonoBehaviour
 
         bool backPosOne = CheckForMatches(tilePosOne, out List<GameObject> destroyTargetGemsForOne);
         bool backPosTwo = CheckForMatches(tilePosTwo, out List<GameObject> destroyTargetGemsForTwo);
+        void GemActCotntrol(List<GameObject> destroyTargetGems)
+        {
+            foreach (GameObject deleteGem in destroyTargetGems)
+            {
+                Destroy(deleteGem);
+                Vector3 emptyPos = deleteGem.transform.position;
+                GemsRefill(gemPositions[deleteGem], emptyPos);
+            }
+            if (refillGems.Count != 0)
+            {
+                //GemActCotntrol(refillGems);
+            }
+            else
+            {
+                return;
+            }
+        }
 
-        foreach(GameObject deleteGem in destroyTargetGemsForOne)
-        {
-            Destroy(deleteGem);
-            Vector3 emptyPos = deleteGem.transform.position;
-            GemsRefill(gemPositions[deleteGem], emptyPos);
-        }
-        foreach(GameObject deleteGem in destroyTargetGemsForTwo)
-        {
-            Destroy(deleteGem);
-            Vector3 emptyPos = deleteGem.transform.position;
-            GemsRefill(gemPositions[deleteGem], emptyPos);
-        }
+        GemActCotntrol(destroyTargetGemsForOne);
+        GemActCotntrol(destroyTargetGemsForTwo);
         
-     
+        
+
+
 
 
         // 보석 교환 작업이 완료되었음
@@ -404,25 +413,20 @@ public class BoardManager : MonoBehaviour
             GameObject upGem = gems[nextPos];
             Vector3 emptyUpPos = gems[nextPos].transform.position;
             var gem = upGem.GetComponent<Gem>();
+
+            // 보석에게 originEmptyPos 위치로 이동하라고 인자를 준다.
+            // 그리고 이동이 끝났을때 GemsRefill 을 실행시킨다.
+            // () => { GemsRefill(nextPos, emptyUpPos); } 로 선언된 이유는 익명 함수로 정의하면 함수를 '값'으로 취급하여 다른곳에 전달하거나 저장할 수 있다. 
             gem.MoveAnimationPresent(originEmptyPos, () => { GemsRefill(nextPos, emptyUpPos); });
-            //upGem.transform.position = originEmptyPos;
             gems[originPos] = upGem;
             gemPositions[upGem] = originPos;
             gems[originPos].name = string.Format(gems[originPos].tag + " " + " {0} , {1}", x, y + 1);
             gems.Remove(nextPos);
             refillGems.Add(upGem);
-            //GemsRefill(nextPos, emptyUpPos);
-            
         }
         else
         {
             return;
         }
     }
-    // GameObject UPGEM에 UP보석 저장
-    // Vector3 UP위치 에 UP보석 위치저장
-    // GEMS 원래위치 = UP보석
-    // GESPOSITIONS UP보석 = 원래위치
-    // GEMS 위에 보석 = 제거
-    
 }
