@@ -1,13 +1,15 @@
+using JetBrains.Annotations;
 using Newtonsoft.Json.Bson;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
 using TMPro.EditorUtilities;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.tvOS;
 
-// List tile 없어도 될듯
+
 public class BoardManager : MonoBehaviour
 {
     public static BoardManager instance;
@@ -24,18 +26,21 @@ public class BoardManager : MonoBehaviour
 
     public List<Vector2Int> deleteGemsThreeMatches = new List<Vector2Int>();
     public List<Vector2Int> deleteGemsFourMatches = new List<Vector2Int>();
+
+    // 파괴할 보석들을 모아두는 List
     public List<Vector2Int> deleteGemsFinal = new List<Vector2Int>();
 
     Dictionary<Vector2Int, GameObject> gems;
     Dictionary<GameObject, Vector2Int> gemPositions;
 
-    // 처음 시작한 타일 키값
+
+
     Vector2Int originTilePos;
-    // 보석 두개가 바뀔때 담는 리스트
+
     public List<GameObject> switchGems = new List<GameObject>();
 
     bool match = false;
-    // 기본함수의 순서를 Awake -> Start 순으로 함수 라이프사이클과 맞추는 것이 좋은 코드 습관을 가지신 것 같습니다.
+
     private void Awake()
     {
         if (!instance)
@@ -59,7 +64,6 @@ public class BoardManager : MonoBehaviour
 
     }
 
-    // TileClass 받아오는 함수
     public void RegisterTileScript(Tile tile)
     {
         tileScript = tile;
@@ -78,18 +82,110 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    // region 사이의 줄간격와 메서드 사이의 줄간격을 일정하게 유지하는 것이 좋습니다.
-    // 팀 단위 작업이라면 팀의 코드 스타일을 따르는 것이 좋으며, 개인 작업일 때도 본인만의 스타일을 구축해나가는 것이 가독성 측면에서 유리합니다.
-
     #region check matches function 
+    public void RefillAndRecheckBoard()
+    {
+        RefillGems();
+        RecheckMatches();
+    }
+
+    private void RefillGems()
+    {
+        // 전체 게임판을 아래에서 위로 순회
+        for (int q = -3; q <= 3; q++)
+        {
+            int r1 = Mathf.Max(-3, -q - 3);
+            int r2 = Mathf.Min(3, -q + 3);
+
+            for (int r = r1; r < r2; r++)
+            {
+                Vector2Int currentPos = new Vector2Int(q, r);
+
+                // 현재 위치가 비어있는지 확인
+                if (!gems.ContainsKey(currentPos) || gems[currentPos] == null)
+                {
+                    // 현재 위치 위에 있는 다음 사용 가능한 보석 찾기
+                    Vector2Int? nextAvailableGemPos = FindNextAvailableGem(currentPos);
+
+                    if (nextAvailableGemPos.HasValue)
+                    {
+                        // 보석 교환
+                        GameObject movingGem = gems[nextAvailableGemPos.Value];
+                        gems[currentPos] = movingGem;
+                        gems.Remove(nextAvailableGemPos.Value);
+                        gemPositions[movingGem] = currentPos;
+
+                        movingGem.GetComponent<Gem>().MoveAnimationPresent(tileScript.AxialToWorld(currentPos, tileScript.width));
+                        // 보석 이동 애니메이션 시작
+                       
+                    }
+                    else
+                    {
+                        // 가장 위에 새로운 보석 생성 후 아래로 떨어뜨리기
+                        //GameObject newGem = CreateNewGem();
+                        //gems[currentPos] = newGem;
+                        //gemPositions[newGem] = currentPos;
+
+                        //// 보석 이동 애니메이션 시작
+                        //newGem.GetComponent<Gem>().MoveAnimationPresent(tileScript.AxialToWorld(currentPos, tileScript.width));
+                    }
+                }
+            }
+        }
+    }
+
+    private Vector2Int? FindNextAvailableGem(Vector2Int currentPos)
+    {
+        for (int y = currentPos.y + 1; y < 7; y++)
+        {
+            Vector2Int checkPos = new Vector2Int(currentPos.x, y);
+            if (gems.ContainsKey(checkPos) && gems[checkPos] != null)
+            {
+                return checkPos;
+            }
+        }
+        return null;
+    }
+
+    private void RecheckMatches()
+    {
+        bool matchesFound = false;
+        // 전체 게임판 순회
+        for (int q = -3; q <= 3; q++)
+        {
+            int r1 = Mathf.Max(-3, -q - 3);
+            int r2 = Mathf.Min(-3, -q + 3);
+
+            for (int r = r1; r < r2; r++)
+            {
+                Vector2Int currentPos = new Vector2Int(r, q);
+
+                if (CheckForMatches(currentPos, out List<GameObject> destroyedGems))
+                {
+                    matchesFound = true;
+                    // 매치된 보석 파괴
+                    foreach (GameObject gem in destroyedGems)
+                    {
+                        Destroy(gem);
+                        gemPositions.Remove(gem);
+                        gems.Remove(gemPositions[gem]);
+                    }
+                }
+            }
+        }
+
+        if (matchesFound)
+        {
+            // 매치가 발견되면 재배치와 재검사 반복
+            RefillAndRecheckBoard();
+        }
+    }
 
     // 인접한 네개의 보석이 백트래킹 탐색을 끝낸후 자기 자신에게 되돌아 왔는지 판단 해주는 변수
     public bool CheckForMatches(Vector2Int tilePos, out List<GameObject> targetDestroyedGems)
     {
-
         targetDestroyedGems = new List<GameObject>();
 
-        // 배열 초기화 
         ResetArray(threeVisited);
         ResetArray(fourVisited);
 
@@ -127,18 +223,12 @@ public class BoardManager : MonoBehaviour
             FourMatches(tilePos, 0);
             deleteGemsFinal.AddRange(deleteGemsFourMatches);
 
-            // 아래와 같이 여러 조건문과 반복문이 있을 경우 한 눈에 코드가 들어오지 않습니다.
-            // 여러 조건문과 반복문이 섞일 경우 주석을 달아주는 것이 좋습니다.
-            //
-            // else return에 중괄호를 달아주시는 건 코드를 일관적으로 보이게 하는 부분이라 좋았습니다!
-            // 조건문, 반복문의 코드를 보니 중괄호의 사용, 줄바꿈 등의 코드 스타일이 일관적이어서 가독성이 높았습니다.
-            //List<Vector2Int> deleteGemesVecDuplicate;
             List<GameObject> moveGems = new List<GameObject>();
             if (deleteGemsFinal.Count >= 3)
             {
+                // 처음에 보석 세팅할때면 패스
                 if (scriptName != "Tile")
                 {
-                    //deleteGemesVecDuplicate = deleteGemsFinal.Distinct().ToList();
                     foreach (Vector2Int pos in deleteGemsFinal)
                     {
                         if (gems.ContainsKey(pos))
@@ -146,29 +236,17 @@ public class BoardManager : MonoBehaviour
                             moveGems.Add(gems[pos]);
                         }
                     }
-                    //deleteGemesVecDuplicate.Clear();
+
+
                     foreach (GameObject gem in moveGems)
                     {
                         if (gemPositions.ContainsKey(gem))
                         {
-                            //Vector3 emptyPos = gem.transform.position;
-                            //Destroy(gem.gameObject);
-                            //GemsRefill(gemPositions[gem], emptyPos);
-
-
                             targetDestroyedGems.Add(gem);
-
-
                             print("Destroy" + gem);
                         }
                     }
-                    //deleteGemsFinal.Clear();
-                    //deleteGemsFourMatches.Clear();
-                    //List<GameObject> refillGemsCopy = new List<GameObject>(refillGems);
-                    //foreach (GameObject gem in refillGemsCopy)
-                    //{
-                    //   CheckForMatches(gemPositions[gem]);
-                    //}
+
                 }
                 deleteGemsFinal.Clear();
                 deleteGemsFourMatches.Clear();
@@ -244,7 +322,7 @@ public class BoardManager : MonoBehaviour
             Vector2Int currentTile = new Vector2Int(row1, col1);
             Vector2Int nextTile = new Vector2Int(row2, col2);
 
-            // Check if the keys are present in the 'gemes' dictionary
+
             if (gems.ContainsKey(currentTile) && gems.ContainsKey(nextTile))
             {
                 if (gems[currentTile] && gems[nextTile])
@@ -270,7 +348,7 @@ public class BoardManager : MonoBehaviour
     private float currentTime = 0;
     private float maxTime = 1f;
     public bool swapping = false;
-    // Jam, Gem, Geme 등의 용어혼용이 있습니다. 통일해주시면 좋을 것 같습니다!
+
     public void HandleGemSwap(List<GameObject> inputSwitchGemes)
     {
         scriptName = this.GetType().Name;
@@ -284,7 +362,6 @@ public class BoardManager : MonoBehaviour
 
     public IEnumerator GemPosChange()
     {
-        // Swap the positions of the gems
         Vector3 gemOne = switchGems[0].transform.position;
         Vector3 gemTwo = switchGems[1].transform.position;
 
@@ -298,34 +375,28 @@ public class BoardManager : MonoBehaviour
         Vector2Int tilePosOne = tileScript.WorldToAxial(gemOne, tileScript.width);
         Vector2Int tilePosTwo = tileScript.WorldToAxial(gemTwo, tileScript.width);
 
-
         bool backPosOne = CheckForMatches(tilePosOne, out List<GameObject> destroyTargetGemsForOne);
         bool backPosTwo = CheckForMatches(tilePosTwo, out List<GameObject> destroyTargetGemsForTwo);
+        List<GameObject> destroyTargetGems = new List<GameObject>(destroyTargetGemsForOne);
+        destroyTargetGems.AddRange(destroyTargetGemsForTwo);
+
+
         void GemActCotntrol(List<GameObject> destroyTargetGems)
         {
             foreach (GameObject deleteGem in destroyTargetGems)
             {
-                Destroy(deleteGem);
-                Vector3 emptyPos = deleteGem.transform.position;
-                GemsRefill(gemPositions[deleteGem], emptyPos);
+                if (gemPositions.TryGetValue(deleteGem, out Vector2Int gemPos))
+                {
+                    Destroy(deleteGem);
+                    gemPositions.Remove(deleteGem);
+                    gems.Remove(gemPos);
+                }
             }
-            if (refillGems.Count != 0)
-            {
-                //GemActCotntrol(refillGems);
-            }
-            else
-            {
-                return;
-            }
+            RefillAndRecheckBoard();
         }
 
         GemActCotntrol(destroyTargetGemsForOne);
         GemActCotntrol(destroyTargetGemsForTwo);
-        
-        
-
-
-
 
         // 보석 교환 작업이 완료되었음
         // 둘다 매치가 안되었다면
@@ -338,20 +409,10 @@ public class BoardManager : MonoBehaviour
         swapping = false;
         switchGems.Clear();
     }
-
-    //private IEnumerator SwapGems(GameObject gemOne, GameObject gemTwo)
-    //{
-    //    Vector3 gemOnePos = switchGems[0].transform.position;
-    //    Vector3 gemTwoPos = switchGems[1].transform.position;
-    //    switchGems[0].GetComponent<Jam>().moveGem(gemTwoPos);
-    //    switchGems[1].GetComponent<Jam>().moveGem(gemOnePos);
-    //    yield return null;
-    //}
-
+    // 갈곳을 찾는 함수
     private IEnumerator SwapGems(Vector3 posOne, Vector3 posTwo)
     {
-        // 코루틴에서 시간 관련 작업을 하실 때 Time.deltaTime을 사용하시기 보다는
-        // yield return new Waitfortime(n)을 사용하시는 게 효율적으로 보입니다.
+
         // 설정된 시간만큼 위치를 교환한다.
         while (currentTime < maxTime)
         {
@@ -360,7 +421,7 @@ public class BoardManager : MonoBehaviour
             currentTime += Time.deltaTime;
             yield return null;
         }
-        // 두 보석의 교환을 완전하게 마무리 하게끔 위치를 바꿔준다(lerp)로 인해 완전히 안바뀔수도 있다.
+
         switchGems[0].transform.position = posTwo;
         switchGems[1].transform.position = posOne;
         currentTime = 0;
@@ -402,31 +463,43 @@ public class BoardManager : MonoBehaviour
 
     List<GameObject> refillGems = new List<GameObject>();
 
-    private void GemsRefill(Vector2Int originPos, Vector3 originEmptyPos)
-    {
-        int x = originPos.x;
-        int y = originPos.y - 1;
-        Vector2Int nextPos = new Vector2Int(x, y);
 
-        if (gems.ContainsKey(nextPos) && gems[nextPos] && gems[nextPos].GetComponent<Gem>())
-        {
-            GameObject upGem = gems[nextPos];
-            Vector3 emptyUpPos = gems[nextPos].transform.position;
-            var gem = upGem.GetComponent<Gem>();
 
-            // 보석에게 originEmptyPos 위치로 이동하라고 인자를 준다.
-            // 그리고 이동이 끝났을때 GemsRefill 을 실행시킨다.
-            // () => { GemsRefill(nextPos, emptyUpPos); } 로 선언된 이유는 익명 함수로 정의하면 함수를 '값'으로 취급하여 다른곳에 전달하거나 저장할 수 있다. 
-            gem.MoveAnimationPresent(originEmptyPos, () => { GemsRefill(nextPos, emptyUpPos); });
-            gems[originPos] = upGem;
-            gemPositions[upGem] = originPos;
-            gems[originPos].name = string.Format(gems[originPos].tag + " " + " {0} , {1}", x, y + 1);
-            gems.Remove(nextPos);
-            refillGems.Add(upGem);
-        }
-        else
-        {
-            return;
-        }
-    }
+    //private void GemsRefill(Vector2Int originPos, Vector3 originEmptyPos)
+    //{
+    //    int x = originPos.x;
+    //    int y = originPos.y - 1;
+    //    Vector2Int nextPos = new Vector2Int(x, y);
+
+    //    if (gems.ContainsKey(nextPos) && gems[nextPos] && gems[nextPos].GetComponent<Gem>())
+    //    {
+    //        GameObject upGem = gems[nextPos];
+    //        Vector3 emptyUpPos = gems[nextPos].transform.position;
+    //        var gem = upGem.GetComponent<Gem>();
+
+    //        // 보석에게 originEmptyPos 위치로 이동하라고 인자를 준다.
+    //        // 그리고 이동이 끝났을때 GemsRefill 을 실행시킨다.
+    //        // () => { GemsRefill(nextPos, emptyUpPos); } 로 선언된 이유는 익명 함수로 정의하면 함수를 '값'으로 취급하여 다른곳에 전달하거나 저장할 수 있다. 
+    //        //gem.MoveAnimationPresent(originEmptyPos, GemsRefillCall);
+
+    //        gems[originPos] = upGem;
+    //        gemPositions[upGem] = originPos;
+    //        gems[originPos].name = string.Format(gems[originPos].tag + " " + " {0} , {1}", x, y + 1);
+    //        gems.Remove(nextPos);
+    //        refillGems.Add(upGem);
+    //        void GemsRefillCall()
+    //        {
+    //            GemsRefill(nextPos, emptyUpPos);
+    //        }
+    //    }
+    //    else
+    //    {
+    //        return;
+    //    }
+    //}
 }
+
+// 보석들이 파괴된다.(o)
+// 보석들에게 움직여도 돼 라고 말해준다.
+// 보석들이 움직인다.
+// 움직인 보석들을 기준으로 다시 매치 검사를 해준다.

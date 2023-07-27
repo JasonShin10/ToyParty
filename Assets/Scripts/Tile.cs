@@ -102,7 +102,7 @@ public class Tile : MonoBehaviour
         gems[axialCoord] = gem;
     }
 
-    private Vector3 AxialToWorld(Vector2Int axialCoord, float width)
+    public Vector3 AxialToWorld(Vector2Int axialCoord, float width)
     {
         float x = axialCoord.x * width * 0.75f;
         float y = (axialCoord.y + (axialCoord.x / 2.0f)) * Mathf.Sqrt(3) * width * 0.5f;
