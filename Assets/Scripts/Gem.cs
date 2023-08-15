@@ -22,7 +22,6 @@ public class Gem : MonoBehaviour
     }
     void Update()
     {
-
             if (isMoving)
             {
                 transform.position = Vector2.Lerp(transform.position, targetPos, 0.1f);
@@ -30,12 +29,10 @@ public class Gem : MonoBehaviour
                 if (!isMoving)
                 {
                     print(this.gameObject.name + "is" + " " + "done");
-      
                     OnMoveComplete?.Invoke();
                     OnMoveComplete = null;
                 }
             }
-        
     }
 
   

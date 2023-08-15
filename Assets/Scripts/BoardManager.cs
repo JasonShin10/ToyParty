@@ -30,10 +30,8 @@ public class BoardManager : MonoBehaviour
     // 파괴할 보석들을 모아두는 List
     public List<Vector2Int> deleteGemsFinal = new List<Vector2Int>();
 
-    Dictionary<Vector2Int, GameObject> gems;
-    Dictionary<GameObject, Vector2Int> gemPositions;
-
-
+    public Dictionary<Vector2Int, GameObject> gems;
+    public Dictionary<GameObject, Vector2Int> gemPositions;
 
     Vector2Int originTilePos;
 
@@ -86,18 +84,19 @@ public class BoardManager : MonoBehaviour
     public void RefillAndRecheckBoard()
     {
         RefillGems();
+        CreateRefillGem();
         RecheckMatches();
     }
 
     private void RefillGems()
     {
         // 전체 게임판을 아래에서 위로 순회
-        for (int q = -3; q <= 3; q++)
+        for (int q = 3; q >= -3; q--)
         {
-            int r1 = Mathf.Max(-3, -q - 3);
+            int r1 = Mathf.Max(-9, -q - 9);
             int r2 = Mathf.Min(3, -q + 3);
 
-            for (int r = r1; r < r2; r++)
+            for (int r = r2 -1; r >= r1; r--)
             {
                 Vector2Int currentPos = new Vector2Int(q, r);
 
@@ -114,18 +113,19 @@ public class BoardManager : MonoBehaviour
                         gems[currentPos] = movingGem;
                         gems.Remove(nextAvailableGemPos.Value);
                         gemPositions[movingGem] = currentPos;
-
                         movingGem.GetComponent<Gem>().MoveAnimationPresent(tileScript.AxialToWorld(currentPos, tileScript.width));
                         // 보석 이동 애니메이션 시작
-                       
                     }
                     else
-                    {
+                    { 
+                        // 위에 보석이 없으면?
+                        // 보석 만들어주는 곳에서 만든다음에
+                        // 딕셔너리에 추가하고
+                        // 보석이동 하면될듯?
                         // 가장 위에 새로운 보석 생성 후 아래로 떨어뜨리기
                         //GameObject newGem = CreateNewGem();
                         //gems[currentPos] = newGem;
                         //gemPositions[newGem] = currentPos;
-
                         //// 보석 이동 애니메이션 시작
                         //newGem.GetComponent<Gem>().MoveAnimationPresent(tileScript.AxialToWorld(currentPos, tileScript.width));
                     }
@@ -134,9 +134,11 @@ public class BoardManager : MonoBehaviour
         }
     }
 
+
+
     private Vector2Int? FindNextAvailableGem(Vector2Int currentPos)
     {
-        for (int y = currentPos.y + 1; y < 7; y++)
+        for (int y = currentPos.y - 1; y >= -9; y--)
         {
             Vector2Int checkPos = new Vector2Int(currentPos.x, y);
             if (gems.ContainsKey(checkPos) && gems[checkPos] != null)
@@ -145,6 +147,25 @@ public class BoardManager : MonoBehaviour
             }
         }
         return null;
+    }
+
+    private void CreateRefillGem()
+    {
+        List<Vector2Int> gemFactoryPoses = tileScript.gemFactoryTiles;
+        
+        for (int i =0; i < gemFactoryPoses.Count; i++)
+        {
+            if (gems[gemFactoryPoses[i]] == null)
+            {
+                //int random = Random.Range(0, tileScript.gemPrefabs.Length);
+                //GameObject gem = Instantiate(tileScript.gemPrefabs[random], tileScript.gem.transform);
+                //Vector3 worldPos = gems[gemFactoryPoses[i]].transform.position;
+                //gem.transform.position = worldPos + new Vector3(0, 0, -0.25f);
+                //gem.name = string.Format(gem.tag + " " + " {0} , {1}", gemFactoryPoses[i].x, gemFactoryPoses[i].y);
+                //gems[gemFactoryPoses[i]] = gem;
+                //gemPositions[gem] = gemFactoryPoses[i];
+            }
+        }
     }
 
     private void RecheckMatches()
