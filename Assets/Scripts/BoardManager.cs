@@ -8,7 +8,7 @@ using TMPro.EditorUtilities;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.tvOS;
-
+using Sirenix.OdinInspector;
 
 public class BoardManager : MonoBehaviour
 {
@@ -30,15 +30,22 @@ public class BoardManager : MonoBehaviour
     // 파괴할 보석들을 모아두는 List
     public List<Vector2Int> deleteGemsFinal = new List<Vector2Int>();
 
+    [ShowInInspector]
     public Dictionary<Vector2Int, GameObject> gems;
+    [ShowInInspector]
     public Dictionary<GameObject, Vector2Int> gemPositions;
-
+    [ShowInInspector]
+    public Dictionary<Vector2Int, GameObject> mergeGem;
+    [ShowInInspector]
+    public Dictionary<GameObject, Vector2Int> mergeGemPos;
     Vector2Int originTilePos;
 
     public List<GameObject> switchGems = new List<GameObject>();
 
     bool match = false;
+    private int movingGemsCounter = 0;
 
+    public ParticleSystem deleteEffect;
     private void Awake()
     {
         if (!instance)
@@ -59,7 +66,7 @@ public class BoardManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        //Debug.Log(tileScript.newGems.Count);
     }
 
     public void RegisterTileScript(Tile tile)
@@ -83,65 +90,156 @@ public class BoardManager : MonoBehaviour
     #region check matches function 
     public void RefillAndRecheckBoard()
     {
+
         RefillGems();
-        CreateRefillGem();
-        RecheckMatches();
+        //ResetDictionary();
+
+        //CreateRefillGem();
+        //RecheckMatches();
     }
 
     private void RefillGems()
     {
-        // 전체 게임판을 아래에서 위로 순회
+        Debug.Log("RefillGems");
+        mergeGem = gems.Concat(tileScript.newGems).ToDictionary(pair => pair.Key, pair => pair.Value);
+        mergeGemPos = gemPositions.Concat(tileScript.newGemsPos).ToDictionary(pair => pair.Key, pair => pair.Value);
+
         for (int q = 3; q >= -3; q--)
         {
             int r1 = Mathf.Max(-9, -q - 9);
             int r2 = Mathf.Min(3, -q + 3);
 
-            for (int r = r2 -1; r >= r1; r--)
+            for (int r = r2 - 1; r >= r1; r--)
             {
                 Vector2Int currentPos = new Vector2Int(q, r);
 
-                // 현재 위치가 비어있는지 확인
-                if (!gems.ContainsKey(currentPos) || gems[currentPos] == null)
+
+                if (!mergeGem.ContainsKey(currentPos) || mergeGem[currentPos] == null)
                 {
-                    // 현재 위치 위에 있는 다음 사용 가능한 보석 찾기
+
                     Vector2Int? nextAvailableGemPos = FindNextAvailableGem(currentPos);
 
                     if (nextAvailableGemPos.HasValue)
                     {
-                        // 보석 교환
-                        GameObject movingGem = gems[nextAvailableGemPos.Value];
-                        gems[currentPos] = movingGem;
-                        gems.Remove(nextAvailableGemPos.Value);
-                        gemPositions[movingGem] = currentPos;
-                        movingGem.GetComponent<Gem>().MoveAnimationPresent(tileScript.AxialToWorld(currentPos, tileScript.width));
-                        // 보석 이동 애니메이션 시작
+
+                        GameObject movingGem = mergeGem[nextAvailableGemPos.Value];
+                        mergeGem[currentPos] = movingGem;
+                        mergeGem[nextAvailableGemPos.Value] = null;
+
+                        mergeGemPos[movingGem] = currentPos;
+                        movingGem.name = string.Format(movingGem.tag + " " + " {0} , {1}", currentPos.x, currentPos.y);
+                        movingGemsCounter++;
+                        Debug.Log(movingGem.name);
+                        movingGem.GetComponent<Gem>().MoveAnimationPresent(tileScript.AxialToWorld(currentPos, tileScript.width), () =>
+                        {
+                            Debug.Log("Before decrement: " + movingGemsCounter);
+                            Debug.Log(movingGem.name);
+                            
+                            --movingGemsCounter;
+                            Debug.Log("After decrement: " + movingGemsCounter);
+                            CheckAllGemsFinishedMoving();
+                        });
+
+                    }
+
+                }
+
+            }
+        }
+ 
+        //CheckAllGemsFinishedMoving();
+    }
+    private void CheckAllGemsFinishedMoving()
+    {
+        if (movingGemsCounter == 0)
+        {
+            Debug.Log("ResetDictionary");
+            ResetDictionary();
+        }
+    }
+    public void ResetDictionary()
+    {
+        gems.Clear();
+        gemPositions.Clear();
+        tileScript.newGems.Clear();
+        tileScript.newGemsPos.Clear();
+        for (int q = -3; q <= 3; q++)
+        {
+            int r1 = Mathf.Max(-9, -q - 9);
+            int r2 = Mathf.Min(3, -q + 3);
+
+            for (int r = r1; r < r2; r++)
+            {
+
+                if (q == -3 && Mathf.Abs(r) > 3)
+                {
+                    continue;
+                }
+                else if (q == -2 && Mathf.Abs(r) > 5)
+                {
+                    continue;
+                }
+                else if (q == -1 && Mathf.Abs(r) > 7)
+                {
+                    continue;
+                }
+                else if (q == 1 && Mathf.Abs(r) > 8)
+                {
+                    continue;
+                }
+                else if (q == 2 && Mathf.Abs(r) > 7)
+                {
+                    continue;
+                }
+                else if (q == 3 && Mathf.Abs(r) > 6)
+                {
+                    continue;
+                }
+                Vector2Int axialCoord = new Vector2Int(q, r);
+                int excludeR1 = Mathf.Max(-3, -q - 3);
+                int excludeR2 = Mathf.Min(3, -q + 3);
+
+                if (!(q >= -3 && q <= 3 && r >= excludeR1 && r < excludeR2))
+                {
+                    if (mergeGem.ContainsKey(axialCoord) && mergeGem[axialCoord] != null)
+                    {
+                        tileScript.newGems[axialCoord] = mergeGem[axialCoord];
+                        tileScript.newGemsPos[mergeGem[axialCoord]] = axialCoord;
                     }
                     else
-                    { 
-                        // 위에 보석이 없으면?
-                        // 보석 만들어주는 곳에서 만든다음에
-                        // 딕셔너리에 추가하고
-                        // 보석이동 하면될듯?
-                        // 가장 위에 새로운 보석 생성 후 아래로 떨어뜨리기
-                        //GameObject newGem = CreateNewGem();
-                        //gems[currentPos] = newGem;
-                        //gemPositions[newGem] = currentPos;
-                        //// 보석 이동 애니메이션 시작
-                        //newGem.GetComponent<Gem>().MoveAnimationPresent(tileScript.AxialToWorld(currentPos, tileScript.width));
+                    {
+                        int random = Random.Range(0, tileScript.gemPrefabs.Length);
+                        GameObject gem = Instantiate(tileScript.gemPrefabs[random], tileScript.newGem.transform);
+                        Vector3 worldPos = tileScript.AxialToWorld(axialCoord, tileScript.width);
+                        gem.transform.position = worldPos + new Vector3(0, 0, -0.25f);
+
+                        gem.name = string.Format(gem.tag + " " + " {0} , {1}", axialCoord.x, axialCoord.y);
+                        tileScript.newGems[axialCoord] = gem;
+                        tileScript.newGemsPos[gem] = axialCoord;
+                    }
+                }
+                else
+                {
+                    if (mergeGem.ContainsKey(axialCoord) && mergeGem[axialCoord] != null)
+                    {
+                        gems[axialCoord] = mergeGem[axialCoord];
+                        gemPositions[mergeGem[axialCoord]] = axialCoord;
                     }
                 }
             }
         }
+        mergeGem.Clear();
+        mergeGemPos.Clear();
+
+        RecheckMatches();
     }
-
-
 
     private Vector2Int? FindNextAvailableGem(Vector2Int currentPos)
     {
         for (int y = currentPos.y - 1; y >= -9; y--)
         {
             Vector2Int checkPos = new Vector2Int(currentPos.x, y);
-            if (gems.ContainsKey(checkPos) && gems[checkPos] != null)
+            if (mergeGem.ContainsKey(checkPos) && mergeGem[checkPos] != null)
             {
                 return checkPos;
             }
@@ -149,57 +247,33 @@ public class BoardManager : MonoBehaviour
         return null;
     }
 
-    private void CreateRefillGem()
-    {
-        List<Vector2Int> gemFactoryPoses = tileScript.gemFactoryTiles;
-        
-        for (int i =0; i < gemFactoryPoses.Count; i++)
-        {
-            if (gems[gemFactoryPoses[i]] == null)
-            {
-                //int random = Random.Range(0, tileScript.gemPrefabs.Length);
-                //GameObject gem = Instantiate(tileScript.gemPrefabs[random], tileScript.gem.transform);
-                //Vector3 worldPos = gems[gemFactoryPoses[i]].transform.position;
-                //gem.transform.position = worldPos + new Vector3(0, 0, -0.25f);
-                //gem.name = string.Format(gem.tag + " " + " {0} , {1}", gemFactoryPoses[i].x, gemFactoryPoses[i].y);
-                //gems[gemFactoryPoses[i]] = gem;
-                //gemPositions[gem] = gemFactoryPoses[i];
-            }
-        }
-    }
-
     private void RecheckMatches()
     {
-        bool matchesFound = false;
+
+
         // 전체 게임판 순회
         for (int q = -3; q <= 3; q++)
         {
             int r1 = Mathf.Max(-3, -q - 3);
-            int r2 = Mathf.Min(-3, -q + 3);
+            int r2 = Mathf.Min(3, -q + 3);
 
             for (int r = r1; r < r2; r++)
             {
-                Vector2Int currentPos = new Vector2Int(r, q);
-
-                if (CheckForMatches(currentPos, out List<GameObject> destroyedGems))
+                Vector2Int currentPos = new Vector2Int(q, r);
+                if (!CheckForMatches(currentPos, out List<GameObject> destroyGems))
                 {
-                    matchesFound = true;
-                    // 매치된 보석 파괴
-                    foreach (GameObject gem in destroyedGems)
-                    {
-                        Destroy(gem);
-                        gemPositions.Remove(gem);
-                        gems.Remove(gemPositions[gem]);
-                    }
+                    
+                    DestroyGemes(destroyGems);
                 }
             }
         }
 
-        if (matchesFound)
-        {
-            // 매치가 발견되면 재배치와 재검사 반복
-            RefillAndRecheckBoard();
-        }
+
+        //if (matchesFound)
+        //{
+        //    // 매치가 발견되면 재배치와 재검사 반복
+        //    RefillAndRecheckBoard();
+        //}
     }
 
     // 인접한 네개의 보석이 백트래킹 탐색을 끝낸후 자기 자신에게 되돌아 왔는지 판단 해주는 변수
@@ -245,6 +319,8 @@ public class BoardManager : MonoBehaviour
             deleteGemsFinal.AddRange(deleteGemsFourMatches);
 
             List<GameObject> moveGems = new List<GameObject>();
+
+
             if (deleteGemsFinal.Count >= 3)
             {
                 // 처음에 보석 세팅할때면 패스
@@ -264,13 +340,15 @@ public class BoardManager : MonoBehaviour
                         if (gemPositions.ContainsKey(gem))
                         {
                             targetDestroyedGems.Add(gem);
-                            print("Destroy" + gem);
+                            
                         }
                     }
 
                 }
+
                 deleteGemsFinal.Clear();
                 deleteGemsFourMatches.Clear();
+
                 return false;
             }
             else
@@ -322,11 +400,9 @@ public class BoardManager : MonoBehaviour
             if (IsInsideGrid(nextQ, nextR) && HasSameColor(q, r, nextQ, nextR) && !fourVisited[nextQ + 10, nextR + 10])
             {
                 fourVisited[nextQ + 10, nextR + 10] = true;
-
                 Vector2Int nextTilePos = new Vector2Int(nextQ, nextR);
                 deleteGemsFourMatches.Add(nextTilePos);
                 FourMatches(nextTilePos, depth + 1);
-
                 if (match == false)
                 {
                     fourVisited[nextQ + 10, nextR + 10] = false;
@@ -381,6 +457,35 @@ public class BoardManager : MonoBehaviour
         }
     }
 
+    void DestroyGemes(List<GameObject> destroyTargetGems)
+    {
+
+        List<GameObject> toBeDestroyed = new List<GameObject>();
+        destroyTargetGems = destroyTargetGems.Distinct().ToList();
+        foreach (GameObject deleteGem in destroyTargetGems)
+        {
+            if (gemPositions.TryGetValue(deleteGem, out Vector2Int gemPos))
+            {
+                toBeDestroyed.Add(deleteGem);
+            }
+        }
+
+        foreach (GameObject deleteGem in toBeDestroyed)
+        {
+            if (gemPositions.TryGetValue(deleteGem, out Vector2Int gemPos))
+            {
+                ParticleSystem particle = Instantiate(deleteEffect, deleteGem.transform.position, Quaternion.identity);
+                ScoreSystem.instance.AddScore();
+                Destroy(particle.gameObject, 1f);
+                Destroy(deleteGem);
+
+                gemPositions.Remove(deleteGem);
+                gems.Remove(gemPos);
+            }
+        }
+
+        RefillAndRecheckBoard();
+    }
     public IEnumerator GemPosChange()
     {
         Vector3 gemOne = switchGems[0].transform.position;
@@ -402,22 +507,9 @@ public class BoardManager : MonoBehaviour
         destroyTargetGems.AddRange(destroyTargetGemsForTwo);
 
 
-        void GemActCotntrol(List<GameObject> destroyTargetGems)
-        {
-            foreach (GameObject deleteGem in destroyTargetGems)
-            {
-                if (gemPositions.TryGetValue(deleteGem, out Vector2Int gemPos))
-                {
-                    Destroy(deleteGem);
-                    gemPositions.Remove(deleteGem);
-                    gems.Remove(gemPos);
-                }
-            }
-            RefillAndRecheckBoard();
-        }
+        
+        DestroyGemes(destroyTargetGems);
 
-        GemActCotntrol(destroyTargetGemsForOne);
-        GemActCotntrol(destroyTargetGemsForTwo);
 
         // 보석 교환 작업이 완료되었음
         // 둘다 매치가 안되었다면
@@ -470,7 +562,7 @@ public class BoardManager : MonoBehaviour
         gems[tilePosTwo].name = string.Format(newGemOne.tag + " " + " {0} , {1}", tilePosTwo.x, tilePosTwo.y);
     }
 
-    public void ResetJamSelection()
+    public void ResetGemSelection()
     {
         for (int i = 0; i < switchGems.Count; i++)
         {

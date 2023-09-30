@@ -1,15 +1,17 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Sirenix.OdinInspector;
+using Unity.VisualScripting;
 
 public class Tile : MonoBehaviour
 {
     public static Tile instance;
-    [SerializeField] private GameObject hexPrefab;
-    [SerializeField] private GameObject[] gemPrefabs;
-    [SerializeField] private GameObject Gem;
+    public GameObject hexPrefab;
+    public GameObject[] gemPrefabs;
+    public GameObject newGem;
     private Dictionary<Vector2Int, GameObject> gems = new Dictionary<Vector2Int, GameObject>();
     private Dictionary<GameObject, Vector2Int> gemPositions = new Dictionary<GameObject, Vector2Int>();
-    GemFactory gemFactory;
+
     public List<Vector2Int> gemFactoryTiles = new List<Vector2Int>();
     private void Awake()
     {
@@ -23,15 +25,18 @@ public class Tile : MonoBehaviour
         BoardManager.instance.RegisterTileScript(this);
         CreateTiles();
         CreateGems();
-        CreateRefillGem();
+        
         
     }
-    
+    [ShowInInspector]
     public Dictionary<Vector2Int, GameObject> Gems { get { return gems; } }
+    [ShowInInspector]
     public Dictionary<GameObject, Vector2Int> GemPositions { get { return gemPositions; } }
     public float width;
-
- 
+    [ShowInInspector]
+    public Dictionary<Vector2Int, GameObject> newGems = new Dictionary<Vector2Int, GameObject>();
+    [ShowInInspector]
+    public Dictionary<GameObject, Vector2Int> newGemsPos = new Dictionary<GameObject, Vector2Int>();
     private void CreateTiles()
     {
         // 6각형의 너비,폭(width)
@@ -47,35 +52,12 @@ public class Tile : MonoBehaviour
             // r2 = 3
             // 4개 쌓임
            
-            int r1 = Mathf.Max(-9, -q - 9);
+            int r1 = Mathf.Max(-3, -q - 3);
             int r2 = Mathf.Min(3, -q + 3);
 
             for (int r = r1; r < r2; r++)
             {
-                if(q == -3 && Mathf.Abs(r) >3)
-                {
-                    continue;
-                }
-                else if (q == -2 && Mathf.Abs(r) >5)
-                {
-                    continue;
-                }
-                else if (q == -1 && Mathf.Abs(r) >7)
-                {
-                    continue;
-                }
-                else if (q == 1 && Mathf.Abs(r) > 8)
-                {
-                    continue;
-                }
-                else if (q == 2 && Mathf.Abs(r) > 7)
-                {
-                    continue;
-                }
-                else if (q == 3 && Mathf.Abs(r) > 6)
-                {
-                    continue;
-                }
+               
 
                 // 축 좌표를 생성한다.
                 Vector2Int axialCoord = new Vector2Int(q, r);
@@ -134,17 +116,26 @@ public class Tile : MonoBehaviour
                 Vector3 worldPos = AxialToWorld(axialCoord, scaleY);
 
                 int random = Random.Range(0, gemPrefabs.Length);
-                GameObject gem = Instantiate(gemPrefabs[random],Gem.transform);
+                GameObject gem = Instantiate(gemPrefabs[random],newGem.transform);
 
                 gem.transform.position = worldPos + new Vector3(0, 0, -0.25f);
                 gem.name = string.Format(gem.tag + " " + " {0} , {1}" , q, r);
-                gems[axialCoord] = gem;
-                gemPositions[gem] = axialCoord;
+
                 int excludeR1 = Mathf.Max(-3, -q - 3);
                 int excludeR2 = Mathf.Min(3, -q + 3);
+                // 따로 등록
                 if (!(q >= -3 && q <= 3 && r >= excludeR1 && r < excludeR2))
                 {
                     gemFactoryTiles.Add(axialCoord);
+                    newGems[axialCoord] = gem;
+                    newGemsPos[gem] = axialCoord;
+                    //gems[axialCoord] = gem;
+                    //gemPositions[gem] = axialCoord;
+                }
+                else
+                {
+                    gems[axialCoord] = gem;
+                    gemPositions[gem] = axialCoord;
                 }
 
                 //GameObject tile = tiles[axialCoord];                                                       
@@ -172,17 +163,15 @@ public class Tile : MonoBehaviour
     }
 
     
-    private void CreateRefillGem()
-    {
-   
-    }
+
 
     public Vector3 AxialToWorld(Vector2Int axialCoord, float width)
     {
         float x = axialCoord.x * width * 0.75f;
         float y = (axialCoord.y + (axialCoord.x / 2.0f)) * Mathf.Sqrt(3) * width * 0.5f;
+        float z = -0.25f;
         // 2D 좌표계와 유니티 좌표계의 차이 때문에 y를 뒤집어준다.
-        return new Vector3(x, -y, 0);
+        return new Vector3(x, -y, -z);
     }
     public Vector2Int WorldToAxial(Vector3 worldPos, float width)
     {
