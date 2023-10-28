@@ -100,7 +100,6 @@ public class BoardManager : MonoBehaviour
 
     private void RefillGems()
     {
-        Debug.Log("RefillGems");
         mergeGem = gems.Concat(tileScript.newGems).ToDictionary(pair => pair.Key, pair => pair.Value);
         mergeGemPos = gemPositions.Concat(tileScript.newGemsPos).ToDictionary(pair => pair.Key, pair => pair.Value);
 
@@ -113,42 +112,41 @@ public class BoardManager : MonoBehaviour
             {
                 Vector2Int currentPos = new Vector2Int(q, r);
 
-
-                if (!mergeGem.ContainsKey(currentPos) || mergeGem[currentPos] == null)
+                if (mergeGem.ContainsKey(currentPos) && mergeGem[currentPos] != null)
                 {
-
-                    Vector2Int? nextAvailableGemPos = FindNextAvailableGem(currentPos);
-
-                    if (nextAvailableGemPos.HasValue)
-                    {
-
-                        GameObject movingGem = mergeGem[nextAvailableGemPos.Value];
-                        mergeGem[currentPos] = movingGem;
-                        mergeGem[nextAvailableGemPos.Value] = null;
-
-                        mergeGemPos[movingGem] = currentPos;
-                        movingGem.name = string.Format(movingGem.tag + " " + " {0} , {1}", currentPos.x, currentPos.y);
-                        movingGemsCounter++;
-                        Debug.Log(movingGem.name);
-                        movingGem.GetComponent<Gem>().MoveAnimationPresent(tileScript.AxialToWorld(currentPos, tileScript.width), () =>
-                        {
-                            Debug.Log("Before decrement: " + movingGemsCounter);
-                            Debug.Log(movingGem.name);
-                            
-                            --movingGemsCounter;
-                            Debug.Log("After decrement: " + movingGemsCounter);
-                            CheckAllGemsFinishedMoving();
-                        });
-
-                    }
-
+                    continue;
                 }
 
+                Vector2Int? nextAvailableGemPos = FindNextAvailableGem(currentPos);
+
+                if (!nextAvailableGemPos.HasValue)
+                {
+                    continue;
+                }
+                ShiftGemToEmptyPosition(currentPos, nextAvailableGemPos.Value);
             }
         }
- 
-        //CheckAllGemsFinishedMoving();
     }
+
+    private void ShiftGemToEmptyPosition(Vector2Int currentPos, Vector2Int availableGemPos)
+    {
+        GameObject movingGem = mergeGem[availableGemPos];
+        mergeGem[currentPos] = movingGem;
+        mergeGem[availableGemPos] = null;
+
+        mergeGemPos[movingGem] = currentPos;
+        movingGem.name = $"{movingGem.tag}  {currentPos.x} , {currentPos.y}";
+        movingGemsCounter++;
+
+        movingGem.GetComponent<Gem>().MoveAnimationPresent(
+            tileScript.AxialToWorld(currentPos, tileScript.width),
+            () =>
+            {
+                --movingGemsCounter;
+                CheckAllGemsFinishedMoving();
+            });
+    }
+
     private void CheckAllGemsFinishedMoving()
     {
         if (movingGemsCounter == 0)
@@ -262,7 +260,7 @@ public class BoardManager : MonoBehaviour
                 Vector2Int currentPos = new Vector2Int(q, r);
                 if (!CheckForMatches(currentPos, out List<GameObject> destroyGems))
                 {
-                    
+
                     DestroyGemes(destroyGems);
                 }
             }
@@ -292,14 +290,14 @@ public class BoardManager : MonoBehaviour
         {
             deleteGemsThreeMatches.Add(tilePos);
             deleteGemsFourMatches.Add(tilePos);
-            // 6가지 방향으로 보석 검사
+          
             for (int dir = 0; dir < 6; dir++)
             {
                 ThreeMatches(tilePos, dir);
                 int oppositeDir = (dir + 3) % 6;
                 ThreeMatches(tilePos, oppositeDir);
 
-                // 한방향으로 보석이 3개 이하면 성립이 안되므로 다음 방향 검사때를 위해 초기화
+
                 if (deleteGemsThreeMatches.Count < 3)
                 {
                     deleteGemsThreeMatches.Clear();
@@ -340,7 +338,7 @@ public class BoardManager : MonoBehaviour
                         if (gemPositions.ContainsKey(gem))
                         {
                             targetDestroyedGems.Add(gem);
-                            
+
                         }
                     }
 
@@ -418,7 +416,6 @@ public class BoardManager : MonoBehaviour
         {
             Vector2Int currentTile = new Vector2Int(row1, col1);
             Vector2Int nextTile = new Vector2Int(row2, col2);
-
 
             if (gems.ContainsKey(currentTile) && gems.ContainsKey(nextTile))
             {
@@ -507,12 +504,9 @@ public class BoardManager : MonoBehaviour
         destroyTargetGems.AddRange(destroyTargetGemsForTwo);
 
 
-        
+
         DestroyGemes(destroyTargetGems);
 
-
-        // 보석 교환 작업이 완료되었음
-        // 둘다 매치가 안되었다면
         if (backPosOne && backPosTwo)
         {
             yield return SwapGems(gemTwo, gemOne);
@@ -575,44 +569,7 @@ public class BoardManager : MonoBehaviour
     #endregion
 
     List<GameObject> refillGems = new List<GameObject>();
-
-
-
-    //private void GemsRefill(Vector2Int originPos, Vector3 originEmptyPos)
-    //{
-    //    int x = originPos.x;
-    //    int y = originPos.y - 1;
-    //    Vector2Int nextPos = new Vector2Int(x, y);
-
-    //    if (gems.ContainsKey(nextPos) && gems[nextPos] && gems[nextPos].GetComponent<Gem>())
-    //    {
-    //        GameObject upGem = gems[nextPos];
-    //        Vector3 emptyUpPos = gems[nextPos].transform.position;
-    //        var gem = upGem.GetComponent<Gem>();
-
-    //        // 보석에게 originEmptyPos 위치로 이동하라고 인자를 준다.
-    //        // 그리고 이동이 끝났을때 GemsRefill 을 실행시킨다.
-    //        // () => { GemsRefill(nextPos, emptyUpPos); } 로 선언된 이유는 익명 함수로 정의하면 함수를 '값'으로 취급하여 다른곳에 전달하거나 저장할 수 있다. 
-    //        //gem.MoveAnimationPresent(originEmptyPos, GemsRefillCall);
-
-    //        gems[originPos] = upGem;
-    //        gemPositions[upGem] = originPos;
-    //        gems[originPos].name = string.Format(gems[originPos].tag + " " + " {0} , {1}", x, y + 1);
-    //        gems.Remove(nextPos);
-    //        refillGems.Add(upGem);
-    //        void GemsRefillCall()
-    //        {
-    //            GemsRefill(nextPos, emptyUpPos);
-    //        }
-    //    }
-    //    else
-    //    {
-    //        return;
-    //    }
-    //}
 }
 
-// 보석들이 파괴된다.(o)
-// 보석들에게 움직여도 돼 라고 말해준다.
-// 보석들이 움직인다.
-// 움직인 보석들을 기준으로 다시 매치 검사를 해준다.
+
+

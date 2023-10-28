@@ -8,3 +8,4 @@ public class Constant : MonoBehaviour
 
     public const string LAYER_NAME_HEXAGON = "Hexagon";
 }
+
