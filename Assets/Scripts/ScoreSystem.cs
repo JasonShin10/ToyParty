@@ -23,7 +23,7 @@ public class ScoreSystem : MonoBehaviour
 
     private void Start()
     {
-        scoreSlider.maxValue = 100;
+        scoreSlider.maxValue = 1000;
 
     }
 
