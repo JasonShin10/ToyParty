@@ -7,7 +7,7 @@ I was inspired by a match-3 game called 'ToyParty' to develop my own match-3 gam
 ## Features
 ### GemSetup
 
-prevented a match event from occurring during the initial gem generation.
+Prevented a match event from occurring during the initial gem generation.
 
 <img src="https://github.com/JasonShin10/april/assets/101558745/0a34a7c3-31ef-4002-9438-e2d2b1bda084" width ="50%" height="50%">
 
