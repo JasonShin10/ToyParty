@@ -2,8 +2,6 @@
 
 I was inspired by a match-3 game called 'ToyParty' to develop my own match-3 game. One unique feature of my game is the use of hexagonal tiles instead of the typical square ones. This presents the challenge of checking for matches in six directions instead of the usual four.
 
-<img src="https://github.com/JasonShin10/ToyParty/assets/101558745/f0f8ef47-0fc3-4a18-82ed-383871ffa24d" alt="ToyPartyMainImage" width="50%" height="50%">
-
 ## Features
 ### GemSetup
 
